@@ -27,6 +27,7 @@ create table category_transaction
     person_id int references person (id) on delete cascade,
     category_id int references category (id) on delete set null,
     amount float not null,
+    description varchar(100),
     created_at timestamp not null CHECK (created_at > TIMESTAMP '2023-01-01 00:00:00')
 );
 
@@ -36,6 +37,7 @@ create table person_transaction
     person_from_id int references person (id) on delete set null,
     person_to_id int references person (id) on delete set null,
     amount float not null check (amount > 0),
+    description varchar(100),
     created_at timestamp not null CHECK (created_at > TIMESTAMP '2023-01-01 00:00:00'),
     check (person_from_id <> person_to_id)
 );
