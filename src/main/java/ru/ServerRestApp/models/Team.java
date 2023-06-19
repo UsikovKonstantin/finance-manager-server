@@ -1,10 +1,9 @@
 package ru.ServerRestApp.models;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-
+import javax.persistence.*;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "Team")
@@ -20,6 +19,47 @@ public class Team {
     @Column(name = "name")
     private String name;
 
+
     @OneToMany(mappedBy = "team")
     private List<Person> people;
+
+
+    public Team() {
+    }
+
+    public Team(String name, List<Person> people) {
+        this.name = name;
+        this.people = people;
+    }
+
+    public Team(int id, String name, List<Person> people) {
+        this.id = id;
+        this.name = name;
+        this.people = people;
+    }
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Person> getPeople() {
+        return people;
+    }
+
+    public void setPeople(List<Person> people) {
+        this.people = people;
+    }
 }

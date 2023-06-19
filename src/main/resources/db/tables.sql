@@ -27,7 +27,8 @@ create table person
     email varchar(50) not null unique,
     password varchar(100) not null,
     balance float not null check (balance >= 0),
-    gender varchar(1) not null check (gender IN ('F', 'M'))
+    gender varchar(1) not null check (gender IN ('F', 'M')),
+    role varchar(20) not null check (role IN ('ROLE_USER', 'ROLE_LEADER'))
 );
 
 create table category_transaction
@@ -79,21 +80,21 @@ insert into category("name") values ('Премия');
 insert into category("name") values ('Пенсия');
 insert into category("name") values ('Услуги ЖКХ');
 
-insert into person(team_id, full_name, email, "password", balance, gender) values (1, 'Майя Иванова','nesarimmena-1871@yopmail.com','5V6bObID3R', 12864,'F');
-insert into person(team_id, full_name, email, "password", balance, gender) values (1, 'Никита Иванов','ciritrumibeu-2755@yopmail.com','AYqpPyZOWY', 11456,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (1, 'Вероника Иванова','mabimomeuke-9014@yopmail.com','slhroLaHhX', 13299,'F');
-insert into person(team_id, full_name, email, "password", balance, gender) values (1, 'Анастасия Иванова','tretrutrekaunou-8088@yopmail.com','J12X9spDK5', 16417,'F');
-insert into person(team_id, full_name, email, "password", balance, gender) values (1, 'Ярослав Иванов','laheureufroxe-7505@yopmail.com','NC254oZaZ9', 10000,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (2, 'Ульяна Гусева','raquilecroikei-7468@yopmail.com','E7yUTVjMOR', 19204,'F');
-insert into person(team_id, full_name, email, "password", balance, gender) values (2, 'Давид Гусев','wufacunnutri-8011@yopmail.com','VfkSDRLmxq', 16417,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (2, 'Андрей Гусев','ponijuvaupe-9101@yopmail.com','FSDnde0qWm', 13299,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (3, 'Данила Михайлов','danila_master2002@yopmail.com','aHrIpFsS5A', 11456,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (3, 'Дарья Михайлова','fokafiffuvou-3117@yopmail.com','RCSJbkmTRX', 12864,'F');
-insert into person(team_id, full_name, email, "password", balance, gender) values (4, 'Андрей Алексеев','cejemmoivoyu-3202@yopmail.com','6cpl93TP5I', 19204,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (4, 'Анастасия Алексеева','xoucroquoigraye-4686@yopmail.com','3b8JHShfqw', 12864,'F');
-insert into person(team_id, full_name, email, "password", balance, gender) values (5, 'Фёдор Кабанов','docriyoppakei-5138@yopmail.com','08IXbV6f', 19204,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (5, 'Александра Кабанов','vouvattakowau-8082@yopmail.com','TBRq5BZG', 19204,'M');
-insert into person(team_id, full_name, email, "password", balance, gender) values (null, 'Дмитрий Иванов','doudle_jump2003@mail.ru','pYyL3Xaw', 50000,'M');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (1, 'Майя Иванова','nesarimmena-1871@yopmail.com','5V6bObID3R', 12864,'F', 'ROLE_LEADER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (1, 'Никита Иванов','ciritrumibeu-2755@yopmail.com','AYqpPyZOWY', 11456,'M', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (1, 'Вероника Иванова','mabimomeuke-9014@yopmail.com','slhroLaHhX', 13299,'F', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (1, 'Анастасия Иванова','tretrutrekaunou-8088@yopmail.com','J12X9spDK5', 16417,'F', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (1, 'Ярослав Иванов','laheureufroxe-7505@yopmail.com','NC254oZaZ9', 10000,'M', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (2, 'Ульяна Гусева','raquilecroikei-7468@yopmail.com','E7yUTVjMOR', 19204,'F', 'ROLE_LEADER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (2, 'Давид Гусев','wufacunnutri-8011@yopmail.com','VfkSDRLmxq', 16417,'M', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (2, 'Андрей Гусев','ponijuvaupe-9101@yopmail.com','FSDnde0qWm', 13299,'M', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (3, 'Данила Михайлов','danila_master2002@yopmail.com','aHrIpFsS5A', 11456,'M', 'ROLE_LEADER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (3, 'Дарья Михайлова','fokafiffuvou-3117@yopmail.com','RCSJbkmTRX', 12864,'F', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (4, 'Андрей Алексеев','cejemmoivoyu-3202@yopmail.com','6cpl93TP5I', 19204,'M', 'ROLE_LEADER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (4, 'Анастасия Алексеева','xoucroquoigraye-4686@yopmail.com','3b8JHShfqw', 12864,'F', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (5, 'Фёдор Кабанов','docriyoppakei-5138@yopmail.com','08IXbV6f', 19204,'M', 'ROLE_LEADER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (5, 'Александра Кабанов','vouvattakowau-8082@yopmail.com','TBRq5BZG', 19204,'M', 'ROLE_USER');
+insert into person(team_id, full_name, email, "password", balance, gender, role) values (null, 'Дмитрий Иванов','doudle_jump2003@mail.ru','pYyL3Xaw', 50000,'M', 'ROLE_USER');
 
 insert into person_transaction (person_from_id, person_to_id, amount, created_at, description) values (5, 11, 2500,'2023-05-30', 'С днём рождения!');
 insert into person_transaction (person_from_id, person_to_id, amount, created_at, description) values (7, 8, 300,'2023-05-30', 'Долг');
