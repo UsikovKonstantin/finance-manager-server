@@ -4,7 +4,7 @@ package ru.ServerRestApp.JWT;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "person")
 public class User
 {
     @Id
