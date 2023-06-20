@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT2.auth;
+package ru.ServerRestApp.JWT.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationResponse {
-
     private  String token;
 }

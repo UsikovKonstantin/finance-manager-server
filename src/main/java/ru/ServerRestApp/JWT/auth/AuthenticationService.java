@@ -1,12 +1,12 @@
-package ru.ServerRestApp.JWT2.auth;
+package ru.ServerRestApp.JWT.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.ServerRestApp.JWT2.config.JwtService;
-import ru.ServerRestApp.JWT2.repository.UserRepository;
+import ru.ServerRestApp.JWT.config.JwtService;
+import ru.ServerRestApp.JWT.repository.UserRepository;
 import ru.ServerRestApp.models.Person;
 
 @Service

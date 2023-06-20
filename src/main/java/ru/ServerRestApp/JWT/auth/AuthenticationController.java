@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT2.auth;
+package ru.ServerRestApp.JWT.auth;
 
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT2.config;
+package ru.ServerRestApp.JWT.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
