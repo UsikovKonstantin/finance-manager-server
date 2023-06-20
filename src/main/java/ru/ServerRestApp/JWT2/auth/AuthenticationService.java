@@ -1,6 +1,6 @@
 package ru.ServerRestApp.JWT2.auth;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,13 +10,20 @@ import ru.ServerRestApp.JWT2.repository.UserRepository;
 import ru.ServerRestApp.models.Person;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+
+    @Autowired
+    public AuthenticationService(UserRepository repository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
+    }
 
     public AuthenticationResponse register(RegisterRequest request) {
         var person = Person.builder()

@@ -38,6 +38,11 @@ public class PeopleService {
         return peopleRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public List<Person> findByTeamId(int id) {
+        return peopleRepository.findByTeamId(id);
+    }
+
     @Transactional
     public void save(Person person) {
         peopleRepository.save(person);
