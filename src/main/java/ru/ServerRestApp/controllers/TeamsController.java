@@ -37,7 +37,7 @@ public class TeamsController {
 
     @PostMapping("/update")
     public Team updateTeam(@RequestBody Team team) {
-        teamsService.save(team);
+        teamsService.update(team);
         return teamsService.findById(team.getId());
     }
 

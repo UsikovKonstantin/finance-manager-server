@@ -24,8 +24,9 @@ public class InvitationsService {
 
 
     @Transactional(readOnly = true)
-    public Optional<Invitation> findById(int id) {
-        return invitationsRepository.findById(id);
+    public Invitation findById(int id) {
+        Optional<Invitation> invitation = invitationsRepository.findById(id);
+        return invitation.get();
     }
 
     @Transactional(readOnly = true)

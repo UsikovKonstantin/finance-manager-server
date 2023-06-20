@@ -24,13 +24,15 @@ public class PeopleService {
 
 
     @Transactional(readOnly = true)
-    public Optional<Person> findById(int id) {
-        return peopleRepository.findById(id);
+    public Person findById(int id) {
+        Optional<Person> person = peopleRepository.findById(id);
+        return person.get();
     }
 
     @Transactional(readOnly = true)
-    public Optional<Person> findByEmail(String email) {
-        return peopleRepository.findByEmail(email);
+    public Person findByEmail(String email) {
+        Optional<Person> person = peopleRepository.findByEmail(email);
+        return person.get();
     }
 
     @Transactional(readOnly = true)
@@ -45,13 +47,16 @@ public class PeopleService {
 
     @Transactional
     public void save(Person person) {
+        if (person.getTeam() != null)
+            person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
         peopleRepository.save(person);
     }
 
     @Transactional
-    public void update(int id, Person updatedPerson) {
-        updatedPerson.setId(id);
-        peopleRepository.save(updatedPerson);
+    public void update(Person person) {
+        if (person.getTeam() != null)
+            person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
+        peopleRepository.save(person);
     }
 
     @Transactional

@@ -8,12 +8,5 @@
       <jdbc-url>jdbc:postgresql://82.179.140.18:5432/finance_manager</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="finance_manager@123.123.12.12" uuid="5f5bfc27-fe39-46a4-bd22-f236e1d901ab">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://123.123.12.12:5432/postgres</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
   </component>
 </project>

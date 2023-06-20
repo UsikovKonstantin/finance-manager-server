@@ -24,8 +24,9 @@ public class PersonTransactionsService {
 
 
     @Transactional(readOnly = true)
-    public Optional<PersonTransaction> findById(int id) {
-        return personTransactionsRepository.findById(id);
+    public PersonTransaction findById(int id) {
+        Optional<PersonTransaction> personTransaction = personTransactionsRepository.findById(id);
+        return personTransaction.get();
     }
 
     @Transactional(readOnly = true)

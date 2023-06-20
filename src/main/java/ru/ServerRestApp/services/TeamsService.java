@@ -36,8 +36,8 @@ public class TeamsService {
     }
 
     @Transactional
-    public void update(Team updatedTeam) {
-        teamsRepository.save(updatedTeam);
+    public void update(Team team) {
+        teamsRepository.save(team);
     }
 
     @Transactional

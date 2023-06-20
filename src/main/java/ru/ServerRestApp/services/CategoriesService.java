@@ -21,28 +21,13 @@ public class CategoriesService {
 
 
     @Transactional(readOnly = true)
-    public Optional<Category> findById(int id) {
-        return categoriesRepository.findById(id);
+    public Category findById(int id) {
+        Optional<Category> category = categoriesRepository.findById(id);
+        return category.get();
     }
 
     @Transactional(readOnly = true)
     public List<Category> findAll() {
         return categoriesRepository.findAll();
-    }
-
-    @Transactional
-    public void save(Category category) {
-        categoriesRepository.save(category);
-    }
-
-    @Transactional
-    public void update(int id, Category updatedCategory) {
-        updatedCategory.setId(id);
-        categoriesRepository.save(updatedCategory);
-    }
-
-    @Transactional
-    public void delete(int id) {
-        categoriesRepository.deleteById(id);
     }
 }
