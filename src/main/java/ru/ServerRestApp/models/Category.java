@@ -1,9 +1,9 @@
 package ru.ServerRestApp.models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "Category")
