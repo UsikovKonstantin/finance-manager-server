@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT;
+/*package ru.ServerRestApp.JWT;
 
 import java.io.Serializable;
 
@@ -36,3 +36,4 @@ public class JwtRequest implements Serializable
         this.password = password;
     }
 }
+*/

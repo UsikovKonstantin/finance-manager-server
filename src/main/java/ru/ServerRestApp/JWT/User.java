@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT;
+/*package ru.ServerRestApp.JWT;
 
 
 import javax.persistence.*;
@@ -38,3 +38,4 @@ public class User
         this.password = password;
     }
 }
+*/

@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT;
+/*package ru.ServerRestApp.JWT;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,3 +23,4 @@ public class UserService implements UserDetailsService {
                 new ArrayList<>());
     }
 }
+*/

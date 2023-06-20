@@ -1,7 +1,8 @@
-package ru.ServerRestApp.JWT;
+/*package ru.ServerRestApp.JWT;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
 }
+*/

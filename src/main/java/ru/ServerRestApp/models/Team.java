@@ -19,23 +19,23 @@ public class Team {
     @Column(name = "name")
     private String name;
 
-
+/*
     @OneToMany(mappedBy = "team")
     private List<Person> people;
-
+*/
 
     public Team() {
     }
 
     public Team(String name, List<Person> people) {
         this.name = name;
-        this.people = people;
+        //this.people = people;
     }
 
     public Team(int id, String name, List<Person> people) {
         this.id = id;
         this.name = name;
-        this.people = people;
+        //this.people = people;
     }
 
 
@@ -54,12 +54,12 @@ public class Team {
     public void setName(String name) {
         this.name = name;
     }
-
+/*
     public List<Person> getPeople() {
         return people;
     }
 
     public void setPeople(List<Person> people) {
         this.people = people;
-    }
+    }*/
 }

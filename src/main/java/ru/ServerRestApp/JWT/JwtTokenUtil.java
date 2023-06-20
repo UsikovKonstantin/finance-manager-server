@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT;
+/*package ru.ServerRestApp.JWT;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -72,3 +72,4 @@ public class JwtTokenUtil implements Serializable
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
+*/

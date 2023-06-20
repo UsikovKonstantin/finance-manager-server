@@ -20,8 +20,9 @@ public class TeamsService {
 
 
     @Transactional(readOnly = true)
-    public Optional<Team> findById(int id) {
-        return teamsRepository.findById(id);
+    public Team findById(int id) {
+        Optional<Team> team = teamsRepository.findById(id);
+        return team.get();
     }
 
     @Transactional(readOnly = true)
@@ -35,8 +36,7 @@ public class TeamsService {
     }
 
     @Transactional
-    public void update(int id, Team updatedTeam) {
-        updatedTeam.setId(id);
+    public void update(Team updatedTeam) {
         teamsRepository.save(updatedTeam);
     }
 

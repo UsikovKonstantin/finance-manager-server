@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT;
+/*package ru.ServerRestApp.JWT;
 
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -72,3 +72,4 @@ public class JwtRequestFilter extends OncePerRequestFilter
     }
 
 }
+*/

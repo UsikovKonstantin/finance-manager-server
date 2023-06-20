@@ -47,7 +47,7 @@ public class Person {
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
-
+/*
     @OneToMany(mappedBy = "person")
     private List<CategoryTransaction> categoryTransactions;
 
@@ -62,7 +62,7 @@ public class Person {
 
     @OneToMany(mappedBy = "person_to")
     private List<PersonTransaction> transactions_to;
-
+*/
 
     public Person() {
     }
@@ -78,11 +78,11 @@ public class Person {
         this.gender = gender;
         this.role = role;
         this.team = team;
-        this.categoryTransactions = categoryTransactions;
-        this.invitations_from = invitations_from;
-        this.invitations_to = invitations_to;
-        this.transactions_from = transactions_from;
-        this.transactions_to = transactions_to;
+        //this.categoryTransactions = categoryTransactions;
+        //this.invitations_from = invitations_from;
+        //this.invitations_to = invitations_to;
+        //this.transactions_from = transactions_from;
+        //this.transactions_to = transactions_to;
     }
 
     public Person(int id, String full_name, String email, String password,
@@ -98,11 +98,11 @@ public class Person {
         this.gender = gender;
         this.role = role;
         this.team = team;
-        this.categoryTransactions = categoryTransactions;
-        this.invitations_from = invitations_from;
-        this.invitations_to = invitations_to;
-        this.transactions_from = transactions_from;
-        this.transactions_to = transactions_to;
+        //this.categoryTransactions = categoryTransactions;
+        //this.invitations_from = invitations_from;
+        //this.invitations_to = invitations_to;
+        //this.transactions_from = transactions_from;
+        //this.transactions_to = transactions_to;
     }
 
 
@@ -169,7 +169,7 @@ public class Person {
     public void setTeam(Team team) {
         this.team = team;
     }
-
+/*
     public List<CategoryTransaction> getCategoryTransactions() {
         return categoryTransactions;
     }
@@ -208,5 +208,5 @@ public class Person {
 
     public void setTransactions_to(List<PersonTransaction> transactions_to) {
         this.transactions_to = transactions_to;
-    }
+    }*/
 }
