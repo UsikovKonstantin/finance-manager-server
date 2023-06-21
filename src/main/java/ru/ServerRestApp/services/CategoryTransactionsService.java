@@ -27,9 +27,8 @@ public class CategoryTransactionsService {
 
 
     @Transactional(readOnly = true)
-    public CategoryTransaction findById(int id) {
-        Optional<CategoryTransaction> categoryTransaction = categoryTransactionsRepository.findById(id);
-        return categoryTransaction.get();
+    public Optional<CategoryTransaction> findById(int id) {
+        return categoryTransactionsRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +42,9 @@ public class CategoryTransactionsService {
             categoryTransaction.setPerson(peopleRepository.findById(categoryTransaction.getPerson().getId()).get());
         if (categoryTransaction.getCategory() != null)
             categoryTransaction.setCategory(categoriesRepository.findById(categoryTransaction.getCategory().getId()).get());
-        categoryTransactionsRepository.save(categoryTransaction);
+
+        int id = categoryTransactionsRepository.save(categoryTransaction).getId();
+        categoryTransaction.setId(id);
     }
 
     @Transactional

@@ -21,9 +21,8 @@ public class CategoriesService {
 
 
     @Transactional(readOnly = true)
-    public Category findById(int id) {
-        Optional<Category> category = categoriesRepository.findById(id);
-        return category.get();
+    public Optional<Category> findById(int id) {
+        return categoriesRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
