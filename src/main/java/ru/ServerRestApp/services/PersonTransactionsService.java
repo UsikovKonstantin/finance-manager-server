@@ -36,12 +36,19 @@ public class PersonTransactionsService {
 
     @Transactional
     public void save(PersonTransaction personTransaction) {
+        if (personTransaction.getPerson_from() != null)
+            personTransaction.setPerson_from(peopleRepository.findById(personTransaction.getPerson_from().getId()).get());
+        if (personTransaction.getPerson_to() != null)
+            personTransaction.setPerson_to(peopleRepository.findById(personTransaction.getPerson_to().getId()).get());
         personTransactionsRepository.save(personTransaction);
     }
 
     @Transactional
-    public void update(int id, PersonTransaction personTransaction) {
-        personTransaction.setId(id);
+    public void update(PersonTransaction personTransaction) {
+        if (personTransaction.getPerson_from() != null)
+            personTransaction.setPerson_from(peopleRepository.findById(personTransaction.getPerson_from().getId()).get());
+        if (personTransaction.getPerson_to() != null)
+            personTransaction.setPerson_to(peopleRepository.findById(personTransaction.getPerson_to().getId()).get());
         personTransactionsRepository.save(personTransaction);
     }
 

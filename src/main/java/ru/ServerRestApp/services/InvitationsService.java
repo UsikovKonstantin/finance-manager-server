@@ -36,13 +36,20 @@ public class InvitationsService {
 
     @Transactional
     public void save(Invitation invitation) {
+        if (invitation.getPerson_from() != null)
+            invitation.setPerson_from(peopleRepository.findById(invitation.getPerson_from().getId()).get());
+        if (invitation.getPerson_to() != null)
+            invitation.setPerson_to(peopleRepository.findById(invitation.getPerson_to().getId()).get());
         invitationsRepository.save(invitation);
     }
 
     @Transactional
-    public void update(int id, Invitation updatedInvitation) {
-        updatedInvitation.setId(id);
-        invitationsRepository.save(updatedInvitation);
+    public void update(Invitation invitation) {
+        if (invitation.getPerson_from() != null)
+            invitation.setPerson_from(peopleRepository.findById(invitation.getPerson_from().getId()).get());
+        if (invitation.getPerson_to() != null)
+            invitation.setPerson_to(peopleRepository.findById(invitation.getPerson_to().getId()).get());
+        invitationsRepository.save(invitation);
     }
 
     @Transactional

@@ -39,13 +39,20 @@ public class CategoryTransactionsService {
 
     @Transactional
     public void save(CategoryTransaction categoryTransaction) {
+        if (categoryTransaction.getPerson() != null)
+            categoryTransaction.setPerson(peopleRepository.findById(categoryTransaction.getPerson().getId()).get());
+        if (categoryTransaction.getCategory() != null)
+            categoryTransaction.setCategory(categoriesRepository.findById(categoryTransaction.getCategory().getId()).get());
         categoryTransactionsRepository.save(categoryTransaction);
     }
 
     @Transactional
-    public void update(int id, CategoryTransaction updatedCategoryTransaction) {
-        updatedCategoryTransaction.setId(id);
-        categoryTransactionsRepository.save(updatedCategoryTransaction);
+    public void update(CategoryTransaction categoryTransaction) {
+        if (categoryTransaction.getPerson() != null)
+            categoryTransaction.setPerson(peopleRepository.findById(categoryTransaction.getPerson().getId()).get());
+        if (categoryTransaction.getCategory() != null)
+            categoryTransaction.setCategory(categoriesRepository.findById(categoryTransaction.getCategory().getId()).get());
+        categoryTransactionsRepository.save(categoryTransaction);
     }
 
     @Transactional
