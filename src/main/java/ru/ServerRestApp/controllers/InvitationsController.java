@@ -7,15 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.models.CategoryTransaction;
 import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.services.InvitationsService;
 import ru.ServerRestApp.util.ErrorResponse;
-import ru.ServerRestApp.util.NotCreatedException;
+import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
+
+import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
 @RequestMapping("/invitations")
@@ -45,19 +46,8 @@ public class InvitationsController {
     @PostMapping("/add")
     public ResponseEntity<Invitation> addInvitation(@RequestBody @Valid Invitation invitation, BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ")
-                        .append(error.getDefaultMessage())
-                        .append(";");
-            }
-
-            throw new NotCreatedException(errorMsg.toString());
-        }
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         invitationsService.save(invitation);
 
@@ -89,7 +79,7 @@ public class InvitationsController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<ErrorResponse> handleException(NotCreatedException e) {
+    private ResponseEntity<ErrorResponse> handleException(DataException e) {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(e.getMessage());
         response.setTimestamp(System.currentTimeMillis());

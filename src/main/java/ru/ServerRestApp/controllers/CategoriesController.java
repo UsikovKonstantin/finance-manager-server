@@ -5,10 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.models.Category;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.util.ErrorResponse;
-import ru.ServerRestApp.util.NotCreatedException;
+import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
@@ -26,17 +25,17 @@ public class CategoriesController {
 
 
     @GetMapping()
-    public List<Category> getAllCategories() {
-        return categoriesService.findAll();
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoriesService.findAll();
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Category getCategory(@PathVariable("id") int id) {
+    public ResponseEntity<Category> getCategory(@PathVariable("id") int id) {
         Optional<Category> category = categoriesService.findById(id);
-        if (category.isPresent())
-            return category.get();
-        else
+        if (category.isEmpty())
             throw new NotFoundException("Category with this id wasn't found!");
+        return new ResponseEntity<>(category.get(), HttpStatus.OK);
     }
 
 
@@ -51,7 +50,7 @@ public class CategoriesController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<ErrorResponse> handleException(NotCreatedException e) {
+    private ResponseEntity<ErrorResponse> handleException(DataException e) {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(e.getMessage());
         response.setTimestamp(System.currentTimeMillis());

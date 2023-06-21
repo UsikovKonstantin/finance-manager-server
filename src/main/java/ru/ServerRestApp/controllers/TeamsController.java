@@ -5,17 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
-import ru.ServerRestApp.util.NotCreatedException;
+import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
+
+import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
 @RequestMapping("/teams")
@@ -29,50 +29,57 @@ public class TeamsController {
 
 
     @GetMapping()
-    public List<Team> getAllTeams() {
-        return teamsService.findAll();
+    public ResponseEntity<List<Team>> getAllTeams() {
+        List<Team> teams = teamsService.findAll();
+        return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Team getTeam(@PathVariable("id") int id) {
+    public ResponseEntity<Team> getTeam(@PathVariable("id") int id) {
         Optional<Team> team = teamsService.findById(id);
-        if (team.isPresent())
-            return team.get();
-        else
+        if (team.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
+        return new ResponseEntity<>(team.get(), HttpStatus.OK);
     }
 
     @PostMapping("/add")
     public ResponseEntity<Team> addTeam(@RequestBody @Valid Team team, BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ")
-                        .append(error.getDefaultMessage())
-                        .append(";");
-            }
-
-            throw new NotCreatedException(errorMsg.toString());
-        }
+        team.setId(0);
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         teamsService.save(team);
 
         return new ResponseEntity<>(team, HttpStatus.OK);
     }
 
-    @PostMapping("/update")
-    public Team updateTeam(@RequestBody Team team) {
+    @PostMapping("/update/{id}")
+    public ResponseEntity<Team> updateTeam(@PathVariable("id") int id, @RequestBody @Valid Team team, BindingResult bindingResult) {
+
+        team.setId(id);
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
+
+        Optional<Team> foundTeam = teamsService.findById(team.getId());
+        if (foundTeam.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+
         teamsService.update(team);
-        return teamsService.findById(team.getId()).get();
+
+        return new ResponseEntity<>(team, HttpStatus.OK);
     }
 
     @PostMapping("/delete/{id}")
-    public void deleteTeam(@PathVariable("id") int id) {
+    public ResponseEntity<Team> deleteTeam(@PathVariable("id") int id) {
+
+        Optional<Team> foundTeam = teamsService.findById(id);
+        if (foundTeam.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+
         teamsService.delete(id);
+
+        return new ResponseEntity<>(foundTeam.get(), HttpStatus.OK);
     }
 
 
@@ -88,7 +95,7 @@ public class TeamsController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<ErrorResponse> handleException(NotCreatedException e) {
+    private ResponseEntity<ErrorResponse> handleException(DataException e) {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(e.getMessage());
         response.setTimestamp(System.currentTimeMillis());

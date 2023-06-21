@@ -7,16 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.util.ErrorResponse;
-import ru.ServerRestApp.util.NotCreatedException;
+import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
+
+import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
 @RequestMapping("/people")
@@ -60,19 +60,8 @@ public class PeopleController {
     @PostMapping("/add")
     public ResponseEntity<Person> addPerson(@RequestBody @Valid Person person, BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ")
-                        .append(error.getDefaultMessage())
-                        .append(";");
-            }
-
-            throw new NotCreatedException(errorMsg.toString());
-        }
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         peopleService.save(person);
 
@@ -103,7 +92,7 @@ public class PeopleController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<ErrorResponse> handleException(NotCreatedException e) {
+    private ResponseEntity<ErrorResponse> handleException(DataException e) {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(e.getMessage());
         response.setTimestamp(System.currentTimeMillis());

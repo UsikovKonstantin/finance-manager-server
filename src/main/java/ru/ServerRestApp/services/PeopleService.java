@@ -56,7 +56,9 @@ public class PeopleService {
     public void update(Person person) {
         if (person.getTeam() != null)
             person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
-        peopleRepository.save(person);
+
+        int id = peopleRepository.save(person).getId();
+        person.setId(id);
     }
 
     @Transactional

@@ -37,7 +37,8 @@ public class TeamsService {
 
     @Transactional
     public void update(Team team) {
-        teamsRepository.save(team);
+        int id = teamsRepository.save(team).getId();
+        team.setId(id);
     }
 
     @Transactional

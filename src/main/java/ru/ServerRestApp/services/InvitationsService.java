@@ -50,7 +50,9 @@ public class InvitationsService {
             invitation.setPerson_from(peopleRepository.findById(invitation.getPerson_from().getId()).get());
         if (invitation.getPerson_to() != null)
             invitation.setPerson_to(peopleRepository.findById(invitation.getPerson_to().getId()).get());
-        invitationsRepository.save(invitation);
+
+        int id = invitationsRepository.save(invitation).getId();
+        invitation.setId(id);
     }
 
     @Transactional

@@ -50,7 +50,9 @@ public class PersonTransactionsService {
             personTransaction.setPerson_from(peopleRepository.findById(personTransaction.getPerson_from().getId()).get());
         if (personTransaction.getPerson_to() != null)
             personTransaction.setPerson_to(peopleRepository.findById(personTransaction.getPerson_to().getId()).get());
-        personTransactionsRepository.save(personTransaction);
+
+        int id = personTransactionsRepository.save(personTransaction).getId();
+        personTransaction.setId(id);
     }
 
     @Transactional
