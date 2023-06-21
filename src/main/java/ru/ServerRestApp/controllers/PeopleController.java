@@ -24,14 +24,19 @@ public class PeopleController {
         return peopleService.findAll();
     }
 
+    @GetMapping("/teamId/{id}")
+    public List<Person> getPeopleByTeamId(@PathVariable("id") int id) {
+        return peopleService.findByTeamId(id);
+    }
+
     @GetMapping("/{id}")
     public Person getPerson(@PathVariable("id") int id) {
         return peopleService.findById(id);
     }
 
-    @GetMapping("/teamId/{id}")
-    public List<Person> getPersonByTeamId(@PathVariable("id") int id) {
-        return peopleService.findByTeamId(id);
+    @GetMapping("/email/{email}")
+    public Person getPersonByEmail(@PathVariable("email") String email) {
+        return peopleService.findByEmail(email);
     }
 
     @PostMapping("/add")
@@ -50,4 +55,5 @@ public class PeopleController {
     public void deleteTeam(@PathVariable("id") int id) {
         peopleService.delete(id);
     }
+
 }

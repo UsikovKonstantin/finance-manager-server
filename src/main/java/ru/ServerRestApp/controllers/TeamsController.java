@@ -19,6 +19,7 @@ public class TeamsController {
         this.teamsService = teamsService;
     }
 
+
     @GetMapping()
     public List<Team> getAllTeams() {
         return teamsService.findAll();
