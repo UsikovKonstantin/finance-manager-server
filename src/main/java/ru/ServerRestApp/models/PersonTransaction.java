@@ -29,11 +29,11 @@ public class PersonTransaction {
 
     @ManyToOne
     @JoinColumn(name = "person_from_id", referencedColumnName = "id")
-    private Person person_from;
+    private Person personFrom;
 
     @ManyToOne
     @JoinColumn(name = "person_to_id", referencedColumnName = "id")
-    private Person person_to;
+    private Person personTo;
 
 
     public PersonTransaction() {
@@ -43,8 +43,8 @@ public class PersonTransaction {
         this.amount = amount;
         this.created_at = created_at;
         this.description = description;
-        this.person_from = person_from;
-        this.person_to = person_to;
+        this.personFrom = person_from;
+        this.personTo = person_to;
     }
 
     public PersonTransaction(int id, double amount, Date created_at, String description, Person person_from, Person person_to) {
@@ -52,8 +52,8 @@ public class PersonTransaction {
         this.amount = amount;
         this.created_at = created_at;
         this.description = description;
-        this.person_from = person_from;
-        this.person_to = person_to;
+        this.personFrom = person_from;
+        this.personTo = person_to;
     }
 
 
@@ -89,19 +89,19 @@ public class PersonTransaction {
         this.description = description;
     }
 
-    public Person getPerson_from() {
-        return person_from;
+    public Person getPersonFrom() {
+        return personFrom;
     }
 
-    public void setPerson_from(Person person_from) {
-        this.person_from = person_from;
+    public void setPersonFrom(Person personFrom) {
+        this.personFrom = personFrom;
     }
 
-    public Person getPerson_to() {
-        return person_to;
+    public Person getPersonTo() {
+        return personTo;
     }
 
-    public void setPerson_to(Person person_to) {
-        this.person_to = person_to;
+    public void setPersonTo(Person personTo) {
+        this.personTo = personTo;
     }
 }

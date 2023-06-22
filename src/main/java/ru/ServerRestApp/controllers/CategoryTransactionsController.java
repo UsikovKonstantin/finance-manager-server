@@ -6,10 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.models.Category;
-import ru.ServerRestApp.models.CategoryTransaction;
-import ru.ServerRestApp.models.Person;
-import ru.ServerRestApp.models.Team;
+import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.services.CategoryTransactionsService;
 import ru.ServerRestApp.services.PeopleService;
@@ -40,6 +37,26 @@ public class CategoryTransactionsController {
     @GetMapping()
     public ResponseEntity<List<CategoryTransaction>> getAllCategoryTransactions() {
         List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findAll();
+        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
+    }
+
+    @GetMapping("/person/{id}")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@PathVariable("id") int id) {
+        Optional<Person> person = peopleService.findById(id);
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(id);
+        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
+    }
+
+    @GetMapping("/category/{id}")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByCategoryId(@PathVariable("id") int id) {
+        Optional<Category> category = categoriesService.findById(id);
+        if (category.isEmpty())
+            throw new NotFoundException("Category with this id wasn't found!");
+
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByCategoryId(id);
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 

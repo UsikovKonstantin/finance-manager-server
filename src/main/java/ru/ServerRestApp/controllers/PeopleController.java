@@ -41,7 +41,7 @@ public class PeopleController {
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
-    @GetMapping("/teamId/{id}")
+    @GetMapping("/team/{id}")
     public ResponseEntity<List<Person>> getPeopleByTeamId(@PathVariable("id") int id) {
         Optional<Team> team = teamsService.findById(id);
         if (team.isEmpty())

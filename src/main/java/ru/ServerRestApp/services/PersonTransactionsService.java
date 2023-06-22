@@ -3,8 +3,8 @@ package ru.ServerRestApp.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.PersonTransaction;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.PersonTransactionsRepository;
 
@@ -33,12 +33,22 @@ public class PersonTransactionsService {
         return personTransactionsRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByPersonFromId(int id) {
+        return personTransactionsRepository.findByPersonFromId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByPersonToId(int id) {
+        return personTransactionsRepository.findByPersonToId(id);
+    }
+
     @Transactional
     public void save(PersonTransaction personTransaction) {
-        if (personTransaction.getPerson_from() != null)
-            personTransaction.setPerson_from(peopleRepository.findById(personTransaction.getPerson_from().getId()).get());
-        if (personTransaction.getPerson_to() != null)
-            personTransaction.setPerson_to(peopleRepository.findById(personTransaction.getPerson_to().getId()).get());
+        if (personTransaction.getPersonFrom() != null)
+            personTransaction.setPersonFrom(peopleRepository.findById(personTransaction.getPersonFrom().getId()).get());
+        if (personTransaction.getPersonTo() != null)
+            personTransaction.setPersonTo(peopleRepository.findById(personTransaction.getPersonTo().getId()).get());
 
         int id = personTransactionsRepository.save(personTransaction).getId();
         personTransaction.setId(id);
@@ -46,10 +56,10 @@ public class PersonTransactionsService {
 
     @Transactional
     public void update(PersonTransaction personTransaction) {
-        if (personTransaction.getPerson_from() != null)
-            personTransaction.setPerson_from(peopleRepository.findById(personTransaction.getPerson_from().getId()).get());
-        if (personTransaction.getPerson_to() != null)
-            personTransaction.setPerson_to(peopleRepository.findById(personTransaction.getPerson_to().getId()).get());
+        if (personTransaction.getPersonFrom() != null)
+            personTransaction.setPersonFrom(peopleRepository.findById(personTransaction.getPersonFrom().getId()).get());
+        if (personTransaction.getPersonTo() != null)
+            personTransaction.setPersonTo(peopleRepository.findById(personTransaction.getPersonTo().getId()).get());
 
         int id = personTransactionsRepository.save(personTransaction).getId();
         personTransaction.setId(id);

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.Invitation;
+import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.repositories.InvitationsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
 
@@ -35,6 +36,16 @@ public class InvitationsService {
     @Transactional(readOnly = true)
     public List<Invitation> findAll() {
         return invitationsRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Invitation> findByPersonFromId(int id) {
+        return invitationsRepository.findByPersonFromId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Invitation> findByPersonToId(int id) {
+        return invitationsRepository.findByPersonToId(id);
     }
 
     @Transactional

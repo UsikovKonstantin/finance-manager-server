@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
+import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.InvitationsService;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.services.TeamsService;
@@ -36,6 +37,26 @@ public class InvitationsController {
     @GetMapping()
     public ResponseEntity<List<Invitation>> getAllInvitations() {
         List<Invitation> invitations = invitationsService.findAll();
+        return new ResponseEntity<>(invitations, HttpStatus.OK);
+    }
+
+    @GetMapping("/personFrom/{id}")
+    public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@PathVariable("id") int id) {
+        Optional<Person> person = peopleService.findById(id);
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        List<Invitation> invitations = invitationsService.findByPersonFromId(id);
+        return new ResponseEntity<>(invitations, HttpStatus.OK);
+    }
+
+    @GetMapping("/personTo/{id}")
+    public ResponseEntity<List<Invitation>> getInvitationsByPersonToId(@PathVariable("id") int id) {
+        Optional<Person> person = peopleService.findById(id);
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        List<Invitation> invitations = invitationsService.findByPersonToId(id);
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 

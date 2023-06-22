@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.CategoryTransaction;
+import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.CategoriesRepository;
 import ru.ServerRestApp.repositories.CategoryTransactionsRepository;
@@ -34,6 +35,16 @@ public class CategoryTransactionsService {
     @Transactional(readOnly = true)
     public List<CategoryTransaction> findAll() {
         return categoryTransactionsRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransaction> findByPersonId(int id) {
+        return categoryTransactionsRepository.findByPersonId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransaction> findByCategoryId(int id) {
+        return categoryTransactionsRepository.findByCategoryId(id);
     }
 
     @Transactional
