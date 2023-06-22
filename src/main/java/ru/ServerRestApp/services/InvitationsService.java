@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.Invitation;
-import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.repositories.InvitationsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
 

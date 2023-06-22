@@ -8,13 +8,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.InvitationsService;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.validators.InvitationValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +27,12 @@ public class InvitationsController {
 
     private final InvitationsService invitationsService;
     private final PeopleService peopleService;
+    private final InvitationValidator invitationValidator;
     @Autowired
-    public InvitationsController(InvitationsService invitationsService, PeopleService peopleService, TeamsService teamsService, TeamsService teamsService1) {
+    public InvitationsController(InvitationsService invitationsService, PeopleService peopleService, TeamsService teamsService, TeamsService teamsService1, InvitationValidator invitationValidator) {
         this.invitationsService = invitationsService;
         this.peopleService = peopleService;
+        this.invitationValidator = invitationValidator;
     }
 
 
@@ -71,36 +73,12 @@ public class InvitationsController {
     @PostMapping("/add")
     public ResponseEntity<Invitation> addInvitation(@RequestBody @Valid Invitation invitation, BindingResult bindingResult) {
 
-        invitation.setId(0);
+        invitationValidator.validate(invitation, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        if (invitation.getPersonFrom() == null)
-            throw new DataException("Person_from must not be null!");
-
-        Optional<Person> person_from = peopleService.findById(invitation.getPersonFrom().getId());
-        if (person_from.isEmpty())
-            throw new NotFoundException("Person_from with this id wasn't found!");
-
-        if (invitation.getPersonTo() == null)
-            throw new DataException("Person_to must not be null!");
-
-        Optional<Person> person_to = peopleService.findById(invitation.getPersonFrom().getId());
-        if (person_to.isEmpty())
-            throw new NotFoundException("Person_to with this id wasn't found!");
-
-        if (invitation.getPersonFrom().getId() == invitation.getPersonTo().getId())
-            throw new DataException("Person_from id must not be equal to Person_to id!");
-
-        Optional<Invitation> foundInvitation = invitationsService.findByIdFromAndIdTo(
-                invitation.getPersonFrom().getId(), invitation.getPersonTo().getId());
-        if (foundInvitation.isPresent())
-            throw new DataException("This invitation already exists!");
-
-        if (peopleService.findById(invitation.getPersonFrom().getId()).get().getTeam().getId() ==
-                peopleService.findById(invitation.getPersonTo().getId()).get().getTeam().getId())
-            throw new DataException("These people are on the same team!");
-
+        invitation.setId(0);
         invitationsService.save(invitation);
 
         return new ResponseEntity<>(invitation, HttpStatus.OK);
@@ -109,39 +87,15 @@ public class InvitationsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<Invitation> updateInvitation(@PathVariable("id") int id, @RequestBody @Valid Invitation invitation, BindingResult bindingResult) {
 
-        invitation.setId(id);
+        if (invitationsService.findById(id).isEmpty())
+            bindingResult.rejectValue("id", "", "Invitation with this id wasn't found!");
+
+        invitationValidator.validate(invitation, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<Invitation> found_invitation = invitationsService.findById(id);
-        if (found_invitation.isEmpty())
-            throw new NotFoundException("Invitation with this id wasn't found!");
-
-        if (invitation.getPersonFrom() == null)
-            throw new DataException("Person_from must not be null!");
-
-        Optional<Person> person_from = peopleService.findById(invitation.getPersonFrom().getId());
-        if (person_from.isEmpty())
-            throw new NotFoundException("Person_from with this id wasn't found!");
-
-        if (invitation.getPersonTo() == null)
-            throw new DataException("Person_to must not be null!");
-
-        Optional<Person> person_to = peopleService.findById(invitation.getPersonFrom().getId());
-        if (person_to.isEmpty())
-            throw new NotFoundException("Person_to with this id wasn't found!");
-
-        if (invitation.getPersonFrom().getId() == invitation.getPersonTo().getId())
-            throw new DataException("Person_from id must not be equal to Person_to id!");
-
-        Optional<Invitation> foundInvitation = invitationsService.findByIdFromAndIdTo(
-                invitation.getPersonFrom().getId(), invitation.getPersonTo().getId());
-        if (foundInvitation.isPresent())
-            throw new DataException("This invitation already exists!");
-
-        if (invitation.getPersonFrom().getTeam().getId() == invitation.getPersonFrom().getTeam().getId())
-            throw new DataException("These people are on the same team!");
-
+        invitation.setId(id);
         invitationsService.update(invitation);
 
         return new ResponseEntity<>(invitation, HttpStatus.OK);

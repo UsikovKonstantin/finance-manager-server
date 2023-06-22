@@ -14,6 +14,7 @@ import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.validators.PersonValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +28,13 @@ public class PeopleController {
     private final PeopleService peopleService;
     private final TeamsService teamsService;
     private final PasswordEncoder passwordEncoder;
+    private final PersonValidator personValidator;
     @Autowired
-    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder) {
+    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator) {
         this.peopleService = peopleService;
         this.teamsService = teamsService;
         this.passwordEncoder = passwordEncoder;
+        this.personValidator = personValidator;
     }
 
 
@@ -70,26 +73,16 @@ public class PeopleController {
     @PostMapping("/update/{id}")
     public ResponseEntity<Person> updatePerson(@PathVariable("id") int id, @RequestBody @Valid Person person, BindingResult bindingResult) {
 
-        person.setId(id);
-        person.setPassword(passwordEncoder.encode(person.getPassword()));
+        if (peopleService.findById(id).isEmpty())
+            bindingResult.rejectValue("id", "", "Person with this id wasn't found!");
+
+        personValidator.validate(person, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<Person> foundPerson = peopleService.findById(id);
-        if (foundPerson.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        if (person.getTeam() == null)
-            throw new DataException("Team must not be null!");
-
-        Optional<Team> team = teamsService.findById(person.getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-
-        Optional<Person> found_person = peopleService.findByEmail(person.getEmail());
-        if (found_person.isPresent() && found_person.get().getId() != person.getId())
-            throw new DataException("Person with this email already exists");
-
+        person.setId(id);
+        person.setPassword(passwordEncoder.encode(person.getPassword()));
         peopleService.update(person);
 
         return new ResponseEntity<>(person, HttpStatus.OK);

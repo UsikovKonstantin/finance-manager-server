@@ -13,6 +13,7 @@ import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.validators.CategoryTransactionValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,13 @@ public class CategoryTransactionsController {
     private final CategoryTransactionsService categoryTransactionsService;
     private final PeopleService peopleService;
     private final CategoriesService categoriesService;
+    private final CategoryTransactionValidator categoryTransactionValidator;
     @Autowired
-    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService) {
+    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService, CategoryTransactionValidator categoryTransactionValidator) {
         this.categoryTransactionsService = categoryTransactionsService;
         this.peopleService = peopleService;
         this.categoriesService = categoriesService;
+        this.categoryTransactionValidator = categoryTransactionValidator;
     }
 
 
@@ -71,27 +74,12 @@ public class CategoryTransactionsController {
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
 
-        categoryTransaction.setId(0);
+        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        if (categoryTransaction.getPerson() == null)
-            throw new DataException("Person must not be null!");
-
-        Optional<Person> person = peopleService.findById(categoryTransaction.getPerson().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        if (categoryTransaction.getCategory() == null)
-            throw new DataException("Category must not be null!");
-
-        Optional<Category> category = categoriesService.findById(categoryTransaction.getCategory().getId());
-        if (category.isEmpty())
-            throw new NotFoundException("Category with this id wasn't found!");
-
-        if (categoryTransaction.getCreated_at() == null)
-            throw new DataException("Created_at must not be null!");
-
+        categoryTransaction.setId(0);
         categoryTransactionsService.save(categoryTransaction);
 
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
@@ -100,31 +88,15 @@ public class CategoryTransactionsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@PathVariable("id") int id, @RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
 
-        categoryTransaction.setId(id);
+        if (categoryTransactionsService.findById(id).isEmpty())
+            bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");
+
+        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<CategoryTransaction> foundCategoryTransaction = categoryTransactionsService.findById(id);
-        if (foundCategoryTransaction.isEmpty())
-            throw new NotFoundException("CategoryTransaction with this id wasn't found!");
-
-        if (categoryTransaction.getPerson() == null)
-            throw new DataException("Person must not be null!");
-
-        Optional<Person> person = peopleService.findById(categoryTransaction.getPerson().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        if (categoryTransaction.getCategory() == null)
-            throw new DataException("Category must not be null!");
-
-        Optional<Category> category = categoriesService.findById(categoryTransaction.getCategory().getId());
-        if (category.isEmpty())
-            throw new NotFoundException("Category with this id wasn't found!");
-
-        if (categoryTransaction.getCreated_at() == null)
-            throw new DataException("Created_at must not be null!");
-
+        categoryTransaction.setId(id);
         categoryTransactionsService.update(categoryTransaction);
 
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);

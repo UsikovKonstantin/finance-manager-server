@@ -24,17 +24,16 @@ public class Invitation {
     public Invitation() {
     }
 
-    public Invitation(Person person_from, Person person_to) {
-        this.personFrom = person_from;
-        this.personTo = person_to;
+    public Invitation(Person personFrom, Person personTo) {
+        this.personFrom = personFrom;
+        this.personTo = personTo;
     }
 
-    public Invitation(int id, Person person_from, Person person_to) {
+    public Invitation(int id, Person personFrom, Person personTo) {
         this.id = id;
-        this.personFrom = person_from;
-        this.personTo = person_to;
+        this.personFrom = personFrom;
+        this.personTo = personTo;
     }
-
 
     public int getId() {
         return id;

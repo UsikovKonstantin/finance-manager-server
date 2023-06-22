@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.services.PeopleService;
@@ -14,6 +13,8 @@ import ru.ServerRestApp.services.PersonTransactionsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.validators.PersonTransactionValidator;
+import ru.ServerRestApp.validators.PersonValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +27,12 @@ public class PersonTransactionsController {
 
     private final PersonTransactionsService personTransactionsService;
     private final PeopleService peopleService;
+    private final PersonTransactionValidator personTransactionValidator;
     @Autowired
-    public PersonTransactionsController(PersonTransactionsService personTransactionsService, PeopleService peopleService) {
+    public PersonTransactionsController(PersonTransactionsService personTransactionsService, PeopleService peopleService, PersonValidator personValidator, PersonTransactionValidator personTransactionValidator) {
         this.personTransactionsService = personTransactionsService;
         this.peopleService = peopleService;
+        this.personTransactionValidator = personTransactionValidator;
     }
 
 
@@ -70,30 +73,12 @@ public class PersonTransactionsController {
     @PostMapping("/add")
     public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
 
-        personTransaction.setId(0);
+        personTransactionValidator.validate(personTransaction, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        if (personTransaction.getPersonFrom() == null)
-            throw new DataException("Person_from must not be null!");
-
-        Optional<Person> person_from = peopleService.findById(personTransaction.getPersonFrom().getId());
-        if (person_from.isEmpty())
-            throw new NotFoundException("Person_from with this id wasn't found!");
-
-        if (personTransaction.getPersonTo() == null)
-            throw new DataException("Person_to must not be null!");
-
-        Optional<Person> person_to = peopleService.findById(personTransaction.getPersonTo().getId());
-        if (person_to.isEmpty())
-            throw new NotFoundException("Person_to with this id wasn't found!");
-
-        if (personTransaction.getPersonFrom().getId() == personTransaction.getPersonTo().getId())
-            throw new DataException("Person_from id must not be equal to Person_to id!");
-
-        if (personTransaction.getCreated_at() == null)
-            throw new DataException("Created_at must not be null!");
-
+        personTransaction.setId(0);
         personTransactionsService.save(personTransaction);
 
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
@@ -102,34 +87,15 @@ public class PersonTransactionsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<PersonTransaction> updatePersonTransaction(@PathVariable("id") int id, @RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
 
-        personTransaction.setId(id);
+        if (personTransactionsService.findById(id).isEmpty())
+            bindingResult.rejectValue("id", "", "PersonTransaction with this id wasn't found!");
+
+        personTransactionValidator.validate(personTransaction, bindingResult);
+
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<PersonTransaction> foundPersonTransaction = personTransactionsService.findById(id);
-        if (foundPersonTransaction.isEmpty())
-            throw new NotFoundException("PersonTransaction with this id wasn't found!");
-
-        if (personTransaction.getPersonFrom() == null)
-            throw new DataException("Person_from must not be null!");
-
-        Optional<Person> person_from = peopleService.findById(personTransaction.getPersonFrom().getId());
-        if (person_from.isEmpty())
-            throw new NotFoundException("Person_from with this id wasn't found!");
-
-        if (personTransaction.getPersonTo() == null)
-            throw new DataException("Person_to must not be null!");
-
-        Optional<Person> person_to = peopleService.findById(personTransaction.getPersonTo().getId());
-        if (person_to.isEmpty())
-            throw new NotFoundException("Person_to with this id wasn't found!");
-
-        if (personTransaction.getPersonFrom().getId() == personTransaction.getPersonTo().getId())
-            throw new DataException("Person_from id must not be equal to Person_to id!");
-
-        if (personTransaction.getCreated_at() == null)
-            throw new DataException("Created_at must not be null!");
-
+        personTransaction.setId(id);
         personTransactionsService.update(personTransaction);
 
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
