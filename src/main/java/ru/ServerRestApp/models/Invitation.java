@@ -15,12 +15,10 @@ public class Invitation {
 
     @ManyToOne
     @JoinColumn(name = "person_from_id", referencedColumnName = "id")
-    @NotNull(message = "Отправитель не должен быть пустым")
     private Person person_from;
 
     @ManyToOne
     @JoinColumn(name = "person_to_id", referencedColumnName = "id")
-    @NotNull(message = "Получатель не должен быть пустым")
     private Person person_to;
 
 

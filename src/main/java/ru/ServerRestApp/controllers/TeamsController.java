@@ -61,7 +61,7 @@ public class TeamsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<Team> foundTeam = teamsService.findById(team.getId());
+        Optional<Team> foundTeam = teamsService.findById(id);
         if (foundTeam.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
 

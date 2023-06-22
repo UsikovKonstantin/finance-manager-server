@@ -1,6 +1,8 @@
 package ru.ServerRestApp.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.util.Date;
@@ -15,6 +17,7 @@ public class CategoryTransaction {
     private int id;
 
     @Column(name = "amount")
+    @Positive
     private double amount;
 
     @Column(name = "created_at")
