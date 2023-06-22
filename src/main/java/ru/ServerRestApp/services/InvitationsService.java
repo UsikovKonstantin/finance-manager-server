@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.Invitation;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.InvitationsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
 
@@ -29,16 +28,21 @@ public class InvitationsService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<Invitation> findByIdFromAndIdTo(int id_from, int id_to) {
+        return invitationsRepository.findByPersonFromIdAndPersonToId(id_from, id_to);
+    }
+
+    @Transactional(readOnly = true)
     public List<Invitation> findAll() {
         return invitationsRepository.findAll();
     }
 
     @Transactional
     public void save(Invitation invitation) {
-        if (invitation.getPerson_from() != null)
-            invitation.setPerson_from(peopleRepository.findById(invitation.getPerson_from().getId()).get());
-        if (invitation.getPerson_to() != null)
-            invitation.setPerson_to(peopleRepository.findById(invitation.getPerson_to().getId()).get());
+        if (invitation.getPersonFrom() != null)
+            invitation.setPersonFrom(peopleRepository.findById(invitation.getPersonFrom().getId()).get());
+        if (invitation.getPersonTo() != null)
+            invitation.setPersonTo(peopleRepository.findById(invitation.getPersonTo().getId()).get());
 
         int id = invitationsRepository.save(invitation).getId();
         invitation.setId(id);
@@ -46,10 +50,10 @@ public class InvitationsService {
 
     @Transactional
     public void update(Invitation invitation) {
-        if (invitation.getPerson_from() != null)
-            invitation.setPerson_from(peopleRepository.findById(invitation.getPerson_from().getId()).get());
-        if (invitation.getPerson_to() != null)
-            invitation.setPerson_to(peopleRepository.findById(invitation.getPerson_to().getId()).get());
+        if (invitation.getPersonFrom() != null)
+            invitation.setPersonFrom(peopleRepository.findById(invitation.getPersonFrom().getId()).get());
+        if (invitation.getPersonTo() != null)
+            invitation.setPersonTo(peopleRepository.findById(invitation.getPersonTo().getId()).get());
 
         int id = invitationsRepository.save(invitation).getId();
         invitation.setId(id);
