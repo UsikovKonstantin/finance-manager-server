@@ -3,10 +3,12 @@ package ru.ServerRestApp.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ServerRestApp.models.CategoryTransaction;
 import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.PersonTransactionsRepository;
+import ru.ServerRestApp.util.DataException;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +52,11 @@ public class PersonTransactionsService {
         if (personTransaction.getPersonTo() != null)
             personTransaction.setPersonTo(peopleRepository.findById(personTransaction.getPersonTo().getId()).get());
 
+        if (personTransaction.getPersonFrom().getBalance() - personTransaction.getAmount() < 0)
+            throw new DataException("Balance must be positive!");
+        personTransaction.getPersonFrom().setBalance(personTransaction.getPersonFrom().getBalance() - personTransaction.getAmount());
+        personTransaction.getPersonTo().setBalance(personTransaction.getPersonTo().getBalance() + personTransaction.getAmount());
+
         int id = personTransactionsRepository.save(personTransaction).getId();
         personTransaction.setId(id);
     }
@@ -61,12 +68,36 @@ public class PersonTransactionsService {
         if (personTransaction.getPersonTo() != null)
             personTransaction.setPersonTo(peopleRepository.findById(personTransaction.getPersonTo().getId()).get());
 
+        PersonTransaction foundPersonTransaction = personTransactionsRepository.findById(personTransaction.getId()).get();
+        if (foundPersonTransaction.getAmount() < personTransaction.getAmount()) {
+            if (personTransaction.getPersonFrom().getBalance() + foundPersonTransaction.getAmount() - personTransaction.getAmount() < 0)
+                throw new DataException("Balance must be positive!");
+        }
+        else {
+            if (personTransaction.getPersonTo().getBalance() - foundPersonTransaction.getAmount() + personTransaction.getAmount() < 0)
+                throw new DataException("Balance must be positive!");
+        }
+        personTransaction.getPersonFrom().setBalance(personTransaction.getPersonFrom().getBalance() + foundPersonTransaction.getAmount() - personTransaction.getAmount());
+        personTransaction.getPersonTo().setBalance(personTransaction.getPersonTo().getBalance() - foundPersonTransaction.getAmount() + personTransaction.getAmount());
+
+
         int id = personTransactionsRepository.save(personTransaction).getId();
         personTransaction.setId(id);
     }
 
     @Transactional
     public void delete(int id) {
+        PersonTransaction personTransaction = personTransactionsRepository.findById(id).get();
+        if (personTransaction.getPersonFrom() != null)
+            personTransaction.setPersonFrom(peopleRepository.findById(personTransaction.getPersonFrom().getId()).get());
+        if (personTransaction.getPersonTo() != null)
+            personTransaction.setPersonTo(peopleRepository.findById(personTransaction.getPersonTo().getId()).get());
+
+        if (personTransaction.getPersonTo().getBalance() - personTransaction.getAmount() < 0)
+            throw new DataException("Balance must be positive!");
+        personTransaction.getPersonFrom().setBalance(personTransaction.getPersonFrom().getBalance() + personTransaction.getAmount());
+        personTransaction.getPersonTo().setBalance(personTransaction.getPersonTo().getBalance() - personTransaction.getAmount());
+
         personTransactionsRepository.deleteById(id);
     }
 }

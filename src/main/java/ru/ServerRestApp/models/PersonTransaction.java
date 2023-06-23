@@ -2,6 +2,7 @@ package ru.ServerRestApp.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.util.Date;
@@ -15,7 +16,7 @@ public class PersonTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Min(value = 0, message = "Сумма перевода должна быть положительной")
+    @Positive
     @Column(name = "amount")
     private double amount;
 

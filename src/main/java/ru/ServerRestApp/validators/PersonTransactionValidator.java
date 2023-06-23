@@ -54,9 +54,12 @@ public class PersonTransactionValidator implements Validator {
         if (personTransaction.getCreated_at() == null)
             errors.rejectValue("created_at", "", "Created_at must not be null!");
 
+        if (personTransaction.getAmount() == 0)
+            errors.rejectValue("amount", "", "Amount must not be 0!");
+
         if (!from || !to) return;
 
         if (personTransaction.getPersonFrom().getId() == personTransaction.getPersonTo().getId())
-            errors.rejectValue("personTo", "", "PersonTo id must not be equal to personTo id!");
+            errors.rejectValue("personTo", "", "PersonTo id must not be equal to personFrom id!");
     }
 }

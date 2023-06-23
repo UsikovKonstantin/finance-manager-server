@@ -9,6 +9,8 @@ import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.CategoriesRepository;
 import ru.ServerRestApp.repositories.CategoryTransactionsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
+import ru.ServerRestApp.util.DataException;
+import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +56,10 @@ public class CategoryTransactionsService {
         if (categoryTransaction.getCategory() != null)
             categoryTransaction.setCategory(categoriesRepository.findById(categoryTransaction.getCategory().getId()).get());
 
+        if (categoryTransaction.getPerson().getBalance() + categoryTransaction.getAmount() < 0)
+            throw new DataException("Balance must be positive!");
+        categoryTransaction.getPerson().setBalance(categoryTransaction.getPerson().getBalance() + categoryTransaction.getAmount());
+
         int id = categoryTransactionsRepository.save(categoryTransaction).getId();
         categoryTransaction.setId(id);
     }
@@ -65,12 +71,27 @@ public class CategoryTransactionsService {
         if (categoryTransaction.getCategory() != null)
             categoryTransaction.setCategory(categoriesRepository.findById(categoryTransaction.getCategory().getId()).get());
 
+        CategoryTransaction foundCategoryTransaction = categoryTransactionsRepository.findById(categoryTransaction.getId()).get();
+        if (categoryTransaction.getPerson().getBalance() - foundCategoryTransaction.getAmount() + categoryTransaction.getAmount() < 0)
+            throw new DataException("Balance must be positive!");
+        categoryTransaction.getPerson().setBalance(categoryTransaction.getPerson().getBalance() - foundCategoryTransaction.getAmount() + categoryTransaction.getAmount());
+
         int id = categoryTransactionsRepository.save(categoryTransaction).getId();
         categoryTransaction.setId(id);
     }
 
     @Transactional
     public void delete(int id) {
+        CategoryTransaction categoryTransaction = categoryTransactionsRepository.findById(id).get();
+        if (categoryTransaction.getPerson() != null)
+            categoryTransaction.setPerson(peopleRepository.findById(categoryTransaction.getPerson().getId()).get());
+        if (categoryTransaction.getCategory() != null)
+            categoryTransaction.setCategory(categoriesRepository.findById(categoryTransaction.getCategory().getId()).get());
+
+        if (categoryTransaction.getPerson().getBalance() - categoryTransaction.getAmount() < 0)
+            throw new DataException("Balance must be positive!");
+        categoryTransaction.getPerson().setBalance(categoryTransaction.getPerson().getBalance() - categoryTransaction.getAmount());
+
         categoryTransactionsRepository.deleteById(id);
     }
 }

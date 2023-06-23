@@ -46,5 +46,8 @@ public class CategoryTransactionValidator implements Validator {
 
         if (categoryTransaction.getCreated_at() == null)
             errors.rejectValue("created_at", "", "Created_at must not be null!");
+
+        if (categoryTransaction.getAmount() == 0)
+            errors.rejectValue("amount", "", "Amount must not be 0!");
     }
 }
