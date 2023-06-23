@@ -13,9 +13,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 @Service
-public class JwtService {
+    public class JwtService {
 
     private static final  String SECRET_KEY = "2or7vB6cLZG22+OHy6O2e2KVfxkU4cHit+kWJGF7FIpqRrySInHIWlE6Yha0PvAN";
     private static final Key jwtAccessSecret = getSignInKey();
@@ -72,7 +73,15 @@ public class JwtService {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException expEx) {
-
+            expEx.getMessage(); //"Token expired"
+        } catch (UnsupportedJwtException unsEx) {
+            unsEx.getMessage(); //"Unsupported jwt"
+        } catch (MalformedJwtException mjEx) {
+            mjEx.getMessage(); //"Malformed jwt"
+        } catch (SignatureException sEx) {
+            sEx.getMessage(); //"Invalid signature"
+        } catch (Exception e) {
+            e.getMessage();   //"Invalid token"
         }
         return false;
     }
