@@ -40,7 +40,7 @@ import java.util.logging.Logger;
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*10))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*4))
                 .signWith(jwtAccessSecret)
                 .compact();
     }
@@ -50,7 +50,7 @@ import java.util.logging.Logger;
         return Jwts
                 .builder()
                 .setSubject(userDetails.getUsername())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*30))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*24*7*3))
                 .signWith(jwtRefreshSecret)
                 .compact();
     }
