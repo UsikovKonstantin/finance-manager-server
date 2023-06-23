@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationResponse {
+    private final String type = "Bearer";
     private  String token;
+    private String refreshToken;
 }
