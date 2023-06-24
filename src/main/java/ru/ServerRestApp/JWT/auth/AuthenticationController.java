@@ -2,6 +2,7 @@ package ru.ServerRestApp.JWT.auth;
 
 
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationService service;
+    public Cookie cookie;
     @Autowired
     public AuthenticationController(AuthenticationService service) {
         this.service = service;

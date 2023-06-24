@@ -1,7 +1,10 @@
 package ru.ServerRestApp.JWT.auth;
 
+import com.fasterxml.jackson.databind.util.TypeKey;
 import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
+import jakarta.servlet.http.Cookie;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +27,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final Map<String, String> refreshStorage = new HashMap<>();
     private String refreshToken;
+    public Cookie cookie;
 
     @Autowired
     public AuthenticationService(UserRepository repository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
@@ -51,6 +55,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)
+                .cookie(new Cookie("refreshToken", refreshToken))
                 .build();
     }
 
@@ -61,6 +66,7 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+        Response res = new Response();
         var person = repository.findByEmail(request.getEmail())
                 .orElseThrow();
         final String accessToken = jwtService.generateToken(person);
@@ -69,6 +75,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)
+                .cookie(new Cookie("refreshToken", refreshToken))
                 .build();
     }
 
@@ -84,12 +91,14 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .token(accessToken)
                         .refreshToken(null)
+                        .cookie(new Cookie("refreshToken", null))
                         .build();
             }
         }
         return AuthenticationResponse.builder()
                 .token(null)
                 .refreshToken(null)
+                .cookie(new Cookie("refreshToken", null))
                 .build();
     }
 
@@ -104,9 +113,11 @@ public class AuthenticationService {
                 final String accessToken = JwtService.generateToken(user);
                 final String newRefreshToken = JwtService.generateRefreshToken(user);
                 refreshStorage.put(user.getEmail(), newRefreshToken);
+                cookie = new Cookie(user.getEmail(),newRefreshToken);
                 return AuthenticationResponse.builder()
                         .token(accessToken)
                         .refreshToken(newRefreshToken)
+                        .cookie(new Cookie("refreshToken", refreshToken))
                         .build();
             }
         }
