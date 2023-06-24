@@ -104,4 +104,16 @@ public class CategoryTransaction {
     public void setCategory(Category category) {
         this.category = category;
     }
+
+    @Override
+    public String toString() {
+        return "CategoryTransaction{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", created_at=" + created_at +
+                ", description='" + description + '\'' +
+                ", person=" + person +
+                ", category=" + category +
+                '}';
+    }
 }

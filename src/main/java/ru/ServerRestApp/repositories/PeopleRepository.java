@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface PeopleRepository extends JpaRepository<Person, Integer> {
     Optional<Person> findByEmail(String email);
     List<Person> findByTeamId(int teamId);
+    List<Person> findByTeamIdAndRole(int teamId, String role);
 }

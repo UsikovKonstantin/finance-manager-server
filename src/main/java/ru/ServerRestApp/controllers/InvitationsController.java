@@ -113,6 +113,19 @@ public class InvitationsController {
         return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
     }
 
+    @PostMapping("/accept/{id}")
+    public ResponseEntity<Invitation> acceptInvitation(@PathVariable("id") int id) {
+
+        Optional<Invitation> foundInvitation = invitationsService.findById(id);
+        if (foundInvitation.isEmpty())
+            throw new NotFoundException("Invitation with this id wasn't found!");
+
+        invitationsService.accept(id);
+
+        return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
+    }
+
+
 
 
     @ExceptionHandler

@@ -105,4 +105,16 @@ public class PersonTransaction {
     public void setPersonTo(Person personTo) {
         this.personTo = personTo;
     }
+
+    @Override
+    public String toString() {
+        return "PersonTransaction{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", created_at=" + created_at +
+                ", description='" + description + '\'' +
+                ", personFrom=" + personFrom +
+                ", personTo=" + personTo +
+                '}';
+    }
 }

@@ -58,4 +58,13 @@ public class Invitation {
     public void setPersonTo(Person personTo) {
         this.personTo = personTo;
     }
+
+    @Override
+    public String toString() {
+        return "Invitation{" +
+                "id=" + id +
+                ", personFrom=" + personFrom +
+                ", personTo=" + personTo +
+                '}';
+    }
 }

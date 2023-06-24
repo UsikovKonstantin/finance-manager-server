@@ -236,4 +236,18 @@ public class Person implements UserDetails {
     public void setTransactions_to(List<PersonTransaction> transactions_to) {
         this.transactions_to = transactions_to;
     }*/
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", full_name='" + full_name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", balance=" + balance +
+                ", gender='" + gender + '\'' +
+                ", role='" + role + '\'' +
+                ", team=" + team +
+                '}';
+    }
 }

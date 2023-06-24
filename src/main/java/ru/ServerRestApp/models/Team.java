@@ -62,4 +62,12 @@ public class Team {
     public void setPeople(List<Person> people) {
         this.people = people;
     }*/
+
+    @Override
+    public String toString() {
+        return "Team{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
