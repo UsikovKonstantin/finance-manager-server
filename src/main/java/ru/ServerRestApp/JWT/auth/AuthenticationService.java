@@ -1,21 +1,24 @@
 package ru.ServerRestApp.JWT.auth;
 
-import com.fasterxml.jackson.databind.util.TypeKey;
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.*;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.pattern.PatternParseException;
 import ru.ServerRestApp.JWT.config.JwtService;
 import ru.ServerRestApp.JWT.repository.UserRepository;
 import ru.ServerRestApp.models.Person;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Service
 
@@ -27,7 +30,6 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final Map<String, String> refreshStorage = new HashMap<>();
     private String refreshToken;
-    public Cookie cookie;
 
     @Autowired
     public AuthenticationService(UserRepository repository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
@@ -39,88 +41,105 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var person = Person.builder()
-                .team(request.getTeam())
-                .full_name(request.getName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .balance(request.getBalance())
-                .gender(request.getGender())
-                .role(request.getRole())
-                .build();
-        repository.save(person);
-        final String accessToken = jwtService.generateToken(person);
-        final String refreshToken  = jwtService.generateRefreshToken(person);
-        refreshStorage.put(person.getEmail(), refreshToken);
-        return AuthenticationResponse.builder()
-                .token(accessToken)
-                .refreshToken(refreshToken)
-                .cookie(new Cookie("refreshToken", refreshToken))
-                .build();
+            var person = Person.builder()
+                    .team(request.getTeam())
+                    .full_name(request.getName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .balance(request.getBalance())
+                    .gender(request.getGender())
+                    .role(request.getRole())
+                    .build();
+            repository.save(person);
+            final String accessToken = jwtService.generateToken(person);
+            final String refreshToken  = jwtService.generateRefreshToken(person);
+            refreshStorage.put(person.getEmail(), refreshToken);
+            return AuthenticationResponse.builder()
+                    .token(accessToken)
+                    .refreshToken(refreshToken)
+                    .cookie(new Cookie("refreshToken", refreshToken))
+                    .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        Response res = new Response();
-        var person = repository.findByEmail(request.getEmail())
-                .orElseThrow();
-        final String accessToken = jwtService.generateToken(person);
-        refreshToken  = jwtService.generateRefreshToken(person);
-        refreshStorage.put(person.getEmail(), refreshToken);
-        return AuthenticationResponse.builder()
-                .token(accessToken)
-                .refreshToken(refreshToken)
-                .cookie(new Cookie("refreshToken", refreshToken))
-                .build();
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+            var person = repository.findByEmail(request.getEmail())
+                    .orElseThrow();
+            final String accessToken = jwtService.generateToken(person);
+            refreshToken  = jwtService.generateRefreshToken(person);
+            refreshStorage.put(person.getEmail(), refreshToken);
+            return AuthenticationResponse.builder()
+                    .token(accessToken)
+                    .refreshToken(refreshToken)
+                    .cookie(new Cookie("refreshToken", refreshToken))
+                    .build();
+        }
+        catch (NoSuchElementException e){ return AuthenticationResponse.builder().error("Такого пользователя не существует").build(); }
+        catch (ResponseStatusException e) { return AuthenticationResponse.builder().error("Неправильно введён логин или пароль").build(); }
     }
 
     public AuthenticationResponse getAccessToken(String refreshToken) {
-        if (JwtService.validateRefreshToken(refreshToken)) {
-            final Claims claims = JwtService.getRefreshClaims(refreshToken);
-            final String login = claims.getSubject();
-            final String saveRefreshToken = refreshStorage.get(login);
-            if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final Person user = repository.findByEmail(login)
-                        .orElseThrow();
-                final String accessToken = JwtService.generateToken(user);
-                return AuthenticationResponse.builder()
-                        .token(accessToken)
-                        .refreshToken(null)
-                        .cookie(new Cookie("refreshToken", null))
-                        .build();
+        try {
+            if (JwtService.validateRefreshToken(refreshToken)) {
+                final Claims claims = JwtService.getRefreshClaims(refreshToken);
+                final String login = claims.getSubject();
+                final String saveRefreshToken = refreshStorage.get(login);
+                if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
+                    final Person user = repository.findByEmail(login)
+                            .orElseThrow();
+                    final String accessToken = JwtService.generateToken(user);
+                    return AuthenticationResponse.builder()
+                            .token(accessToken)
+                            .refreshToken(null)
+                            .cookie(new Cookie("refreshToken", null))
+                            .build();
+                }
+                else {
+                    return AuthenticationResponse.builder().error("Такого рефреш токена не существует").build();
+                }
             }
         }
-        return AuthenticationResponse.builder()
-                .token(null)
-                .refreshToken(null)
-                .cookie(new Cookie("refreshToken", null))
-                .build();
+        catch (ExpiredJwtException e) { return AuthenticationResponse.builder().error("Срок действия токена истек").build(); }
+        catch (UnsupportedJwtException e) { return AuthenticationResponse.builder().error("Неподдерживаемый jwt").build(); }
+        catch (MalformedJwtException e) { return AuthenticationResponse.builder().error("Деформированный jwt").build();}
+        catch (SignatureException e) { return AuthenticationResponse.builder().error("Недействительная подпись").build(); }
+        catch (Exception e) { return AuthenticationResponse.builder().error("Невалидный токен").build(); }
+        return AuthenticationResponse.builder().build();
     }
 
     public AuthenticationResponse refresh(String refreshToken) throws AuthException {
-        if (JwtService.validateRefreshToken(refreshToken)) {
-            final Claims claims = JwtService.getRefreshClaims(refreshToken);
-            final String login = claims.getSubject();
-            final String saveRefreshToken = refreshStorage.get(login);
-            if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                final Person user = repository.findByEmail(login)
-                        .orElseThrow();
-                final String accessToken = JwtService.generateToken(user);
-                final String newRefreshToken = JwtService.generateRefreshToken(user);
-                refreshStorage.put(user.getEmail(), newRefreshToken);
-                cookie = new Cookie(user.getEmail(),newRefreshToken);
-                return AuthenticationResponse.builder()
-                        .token(accessToken)
-                        .refreshToken(newRefreshToken)
-                        .cookie(new Cookie("refreshToken", refreshToken))
-                        .build();
+        try {
+            if (JwtService.validateRefreshToken(refreshToken)) {
+                final Claims claims = JwtService.getRefreshClaims(refreshToken);
+                final String login = claims.getSubject();
+                final String saveRefreshToken = refreshStorage.get(login);
+                if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
+                    final Person user = repository.findByEmail(login)
+                            .orElseThrow();
+
+                    final String accessToken = JwtService.generateToken(user);
+                    final String newRefreshToken = JwtService.generateRefreshToken(user);
+                    refreshStorage.put(user.getEmail(), newRefreshToken);
+                    return AuthenticationResponse.builder()
+                            .token(accessToken)
+                            .refreshToken(newRefreshToken)
+                            .cookie(new Cookie("refreshToken", newRefreshToken))
+                            .build();
+                }
+                else return AuthenticationResponse.builder().error("Такого рефреш токена не существует").build();
             }
         }
-        throw new AuthException("Невалидный JWT токен");
+        catch (ExpiredJwtException e) { return AuthenticationResponse.builder().error("Срок действия токена истек").build(); }
+        catch (UnsupportedJwtException e) { return AuthenticationResponse.builder().error("Неподдерживаемый jwt").build(); }
+        catch (MalformedJwtException e) { return AuthenticationResponse.builder().error("Деформированный jwt").build();}
+        catch (SignatureException e) { return AuthenticationResponse.builder().error("Недействительная подпись").build(); }
+        catch (Exception e) { return AuthenticationResponse.builder().error("Невалидный токен").build(); }
+        return AuthenticationResponse.builder().build();
     }
 }

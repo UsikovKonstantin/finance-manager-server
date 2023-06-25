@@ -15,4 +15,5 @@ public class AuthenticationResponse {
     private  String token;
     private String refreshToken;
     private Cookie cookie;
+    private String error;
 }

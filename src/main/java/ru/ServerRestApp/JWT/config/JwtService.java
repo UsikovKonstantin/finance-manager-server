@@ -73,17 +73,16 @@ import java.util.logging.Logger;
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException expEx) {
-            expEx.getMessage(); //"Token expired"
+            throw expEx; //"Token expired"
         } catch (UnsupportedJwtException unsEx) {
-            unsEx.getMessage(); //"Unsupported jwt"
+            throw unsEx; //"Unsupported jwt"
         } catch (MalformedJwtException mjEx) {
-            mjEx.getMessage(); //"Malformed jwt"
+            throw mjEx; //"Malformed jwt"
         } catch (SignatureException sEx) {
-            sEx.getMessage(); //"Invalid signature"
+            throw sEx; //"Invalid signature"
         } catch (Exception e) {
-            e.getMessage();   //"Invalid token"
+            throw e;   //"Invalid token"
         }
-        return false;
     }
 
     public static Claims getRefreshClaims(@NonNull String token) {
