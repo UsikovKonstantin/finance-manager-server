@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5173")
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
 
@@ -18,25 +19,21 @@ public class AuthenticationController {
         this.service = service;
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
         return ResponseEntity.ok(service.register(request));
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody  AuthenticationRequest request){
         return ResponseEntity.ok(service.authenticate(request));
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/token")
     public ResponseEntity<AuthenticationResponse> getNewAccessToken(@RequestBody  RefreshJwtRequest  request){
         return ResponseEntity.ok(service.getAccessToken(request.getRefreshToken()));
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@RequestBody  RefreshJwtRequest request) throws AuthException {
         return ResponseEntity.ok(service.refresh(request.getRefreshToken()));

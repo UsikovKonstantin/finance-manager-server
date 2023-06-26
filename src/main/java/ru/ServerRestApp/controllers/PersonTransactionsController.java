@@ -22,6 +22,7 @@ import java.util.Optional;
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5173")
 @RequestMapping("/personTransactions")
 public class PersonTransactionsController {
 
@@ -36,14 +37,12 @@ public class PersonTransactionsController {
     }
 
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping()
     public ResponseEntity<List<PersonTransaction>> getAllPersonTransactions() {
         List<PersonTransaction> personTransaction = personTransactionsService.findAll();
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/personFrom/{id}")
     public ResponseEntity<List<PersonTransaction>> getPersonTransactionsByPersonFromId(@PathVariable("id") int id) {
         Optional<Person> person = peopleService.findById(id);
@@ -54,7 +53,6 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransactions, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/personTo/{id}")
     public ResponseEntity<List<PersonTransaction>> getPersonTransactionsByPersonToId(@PathVariable("id") int id) {
         Optional<Person> person = peopleService.findById(id);
@@ -65,7 +63,6 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransactions, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/{id}")
     public ResponseEntity<PersonTransaction> getPersonTransaction(@PathVariable("id") int id) {
         Optional<PersonTransaction> personTransaction = personTransactionsService.findById(id);
@@ -74,7 +71,6 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransaction.get(), HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/add")
     public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
 
@@ -89,7 +85,6 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/update/{id}")
     public ResponseEntity<PersonTransaction> updatePersonTransaction(@PathVariable("id") int id, @RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
 
@@ -107,7 +102,6 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/delete/{id}")
     public ResponseEntity<PersonTransaction> deletePersonTransaction(@PathVariable("id") int id) {
 

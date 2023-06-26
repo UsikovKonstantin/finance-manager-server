@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5173")
 @RequestMapping("/categories")
 public class CategoriesController {
 
@@ -24,14 +25,12 @@ public class CategoriesController {
     }
 
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping()
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoriesService.findAll();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategory(@PathVariable("id") int id) {
         Optional<Category> category = categoriesService.findById(id);

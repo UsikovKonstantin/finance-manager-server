@@ -21,6 +21,7 @@ import java.util.Optional;
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
+@CrossOrigin(origins = "http://127.0.0.1:5173")
 @RequestMapping("/categoryTransactions")
 public class CategoryTransactionsController {
 
@@ -37,14 +38,13 @@ public class CategoryTransactionsController {
     }
 
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping()
     public ResponseEntity<List<CategoryTransaction>> getAllCategoryTransactions() {
         List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findAll();
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
+
     @GetMapping("/person/{id}")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@PathVariable("id") int id) {
         Optional<Person> person = peopleService.findById(id);
@@ -55,7 +55,6 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/category/{id}")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByCategoryId(@PathVariable("id") int id) {
         Optional<Category> category = categoriesService.findById(id);
@@ -66,7 +65,6 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/{id}")
     public ResponseEntity<CategoryTransaction> getCategoryTransaction(@PathVariable("id") int id) {
         Optional<CategoryTransaction> categoryTransaction = categoryTransactionsService.findById(id);
@@ -75,7 +73,6 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransaction.get(), HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
 
@@ -90,7 +87,6 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/update/{id}")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@PathVariable("id") int id, @RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
 
@@ -109,7 +105,6 @@ public class CategoryTransactionsController {
     }
 
 
-    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/delete/{id}")
     public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@PathVariable("id") int id) {
 
