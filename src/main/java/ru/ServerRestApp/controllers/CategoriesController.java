@@ -24,14 +24,14 @@ public class CategoriesController {
     }
 
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping()
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoriesService.findAll();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategory(@PathVariable("id") int id) {
         Optional<Category> category = categoriesService.findById(id);

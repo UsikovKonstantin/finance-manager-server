@@ -28,14 +28,14 @@ public class TeamsController {
     }
 
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping()
     public ResponseEntity<List<Team>> getAllTeams() {
         List<Team> teams = teamsService.findAll();
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @GetMapping("/{id}")
     public ResponseEntity<Team> getTeam(@PathVariable("id") int id) {
         Optional<Team> team = teamsService.findById(id);
@@ -44,7 +44,7 @@ public class TeamsController {
         return new ResponseEntity<>(team.get(), HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/add")
     public ResponseEntity<Team> addTeam(@RequestBody @Valid Team team, BindingResult bindingResult) {
 
@@ -57,7 +57,7 @@ public class TeamsController {
         return new ResponseEntity<>(team, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/update/{id}")
     public ResponseEntity<Team> updateTeam(@PathVariable("id") int id, @RequestBody @Valid Team team, BindingResult bindingResult) {
 
@@ -74,7 +74,7 @@ public class TeamsController {
         return new ResponseEntity<>(team, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins = "http://localhost:5173")
+    @CrossOrigin(origins = "http://127.0.0.1:5173")
     @PostMapping("/delete/{id}")
     public ResponseEntity<Team> deleteTeam(@PathVariable("id") int id) {
 
