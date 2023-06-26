@@ -36,12 +36,14 @@ public class InvitationsController {
     }
 
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping()
     public ResponseEntity<List<Invitation>> getAllInvitations() {
         List<Invitation> invitations = invitationsService.findAll();
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/personFrom/{id}")
     public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@PathVariable("id") int id) {
         Optional<Person> person = peopleService.findById(id);
@@ -52,6 +54,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/personTo/{id}")
     public ResponseEntity<List<Invitation>> getInvitationsByPersonToId(@PathVariable("id") int id) {
         Optional<Person> person = peopleService.findById(id);
@@ -62,6 +65,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/{id}")
     public ResponseEntity<Invitation> getInvitation(@PathVariable("id") int id) {
         Optional<Invitation> invitation = invitationsService.findById(id);
@@ -70,6 +74,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation.get(), HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/add")
     public ResponseEntity<Invitation> addInvitation(@RequestBody @Valid Invitation invitation, BindingResult bindingResult) {
 
@@ -84,6 +89,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/update/{id}")
     public ResponseEntity<Invitation> updateInvitation(@PathVariable("id") int id, @RequestBody @Valid Invitation invitation, BindingResult bindingResult) {
 
@@ -101,6 +107,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/delete/{id}")
     public ResponseEntity<Invitation> deleteInvitation(@PathVariable("id") int id) {
 
@@ -113,6 +120,7 @@ public class InvitationsController {
         return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/accept/{id}")
     public ResponseEntity<Invitation> acceptInvitation(@PathVariable("id") int id) {
 

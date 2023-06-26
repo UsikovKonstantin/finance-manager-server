@@ -37,13 +37,14 @@ public class PeopleController {
         this.personValidator = personValidator;
     }
 
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping()
     public ResponseEntity<List<Person>> getAllPeople() {
         List<Person> people = peopleService.findAll();
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/team/{id}")
     public ResponseEntity<List<Person>> getPeopleByTeamId(@PathVariable("id") int id) {
         Optional<Team> team = teamsService.findById(id);
@@ -54,6 +55,7 @@ public class PeopleController {
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/{id}")
     public ResponseEntity<Person> getPerson(@PathVariable("id") int id) {
         Optional<Person> person = peopleService.findById(id);
@@ -62,6 +64,7 @@ public class PeopleController {
         return new ResponseEntity<>(person.get(), HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @GetMapping("/email/{email}")
     public ResponseEntity<Person> getPersonByEmail(@PathVariable("email") String email) {
         Optional<Person> person = peopleService.findByEmail(email);
@@ -70,6 +73,7 @@ public class PeopleController {
         return new ResponseEntity<>(person.get(), HttpStatus.OK);
     }
 
+    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/update/{id}")
     public ResponseEntity<Person> updatePerson(@PathVariable("id") int id, @RequestBody @Valid Person person, BindingResult bindingResult) {
 
