@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.services.PeopleService;
@@ -22,7 +24,7 @@ import java.util.Optional;
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/personTransactions")
 public class PersonTransactionsController {
 
@@ -88,6 +90,7 @@ public class PersonTransactionsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<PersonTransaction> updatePersonTransaction(@PathVariable("id") int id, @RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
 
+        personTransaction.setId(id);
         if (personTransactionsService.findById(id).isEmpty())
             bindingResult.rejectValue("id", "", "PersonTransaction with this id wasn't found!");
 
@@ -96,7 +99,6 @@ public class PersonTransactionsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        personTransaction.setId(id);
         personTransactionsService.update(personTransaction);
 
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
@@ -133,6 +135,16 @@ public class PersonTransactionsController {
 
         // В HTTP ответе тело ответа (response) и в заголовке статус
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<ErrorResponse> handleException(AuthenticationException e) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(e.getMessage());
+        response.setTimestamp(System.currentTimeMillis());
+
+        // В HTTP ответе тело ответа (response) и в заголовке статус
+        return new ResponseEntity<>(response, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
     }
 
 }

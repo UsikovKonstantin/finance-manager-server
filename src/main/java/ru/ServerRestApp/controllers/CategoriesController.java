@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.models.Category;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.util.ErrorResponse;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/categories")
 public class CategoriesController {
 
@@ -39,7 +40,6 @@ public class CategoriesController {
         return new ResponseEntity<>(category.get(), HttpStatus.OK);
     }
 
-
     @ExceptionHandler
     private ResponseEntity<ErrorResponse> handleException(NotFoundException e) {
         ErrorResponse response = new ErrorResponse();
@@ -58,5 +58,15 @@ public class CategoriesController {
 
         // В HTTP ответе тело ответа (response) и в заголовке статус
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<ErrorResponse> handleException(HttpClientErrorException.Unauthorized e) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(e.getMessage());
+        response.setTimestamp(System.currentTimeMillis());
+
+        // В HTTP ответе тело ответа (response) и в заголовке статус
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 }

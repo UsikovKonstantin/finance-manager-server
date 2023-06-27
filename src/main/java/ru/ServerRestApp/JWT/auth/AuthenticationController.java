@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final AuthenticationService service;
-    public Cookie cookie;
     @Autowired
     public AuthenticationController(AuthenticationService service) {
         this.service = service;
@@ -41,7 +40,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<AuthenticationResponse> logout(@CookieValue HttpServletResponse response){
+    public ResponseEntity<AuthenticationResponse> logout(HttpServletResponse response){
         return ResponseEntity.ok(service.logout(response));
     }
 }

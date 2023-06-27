@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.services.InvitationsService;
@@ -22,7 +23,7 @@ import java.util.Optional;
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/invitations")
 public class InvitationsController {
 
@@ -88,6 +89,8 @@ public class InvitationsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<Invitation> updateInvitation(@PathVariable("id") int id, @RequestBody @Valid Invitation invitation, BindingResult bindingResult) {
 
+        invitation.setId(id);
+
         if (invitationsService.findById(id).isEmpty())
             bindingResult.rejectValue("id", "", "Invitation with this id wasn't found!");
 
@@ -96,7 +99,6 @@ public class InvitationsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        invitation.setId(id);
         invitationsService.update(invitation);
 
         return new ResponseEntity<>(invitation, HttpStatus.OK);
@@ -147,6 +149,16 @@ public class InvitationsController {
 
         // В HTTP ответе тело ответа (response) и в заголовке статус
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<ErrorResponse> handleException(HttpClientErrorException.Unauthorized e) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(e.getMessage());
+        response.setTimestamp(System.currentTimeMillis());
+
+        // В HTTP ответе тело ответа (response) и в заголовке статус
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
 }

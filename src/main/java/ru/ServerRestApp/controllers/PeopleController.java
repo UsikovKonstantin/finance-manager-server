@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import ru.ServerRestApp.JWT.auth.AuthenticationController;
+import ru.ServerRestApp.JWT.auth.AuthenticationService;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.PeopleService;
@@ -22,7 +25,7 @@ import java.util.Optional;
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/people")
 public class PeopleController {
 
@@ -73,6 +76,7 @@ public class PeopleController {
     @PostMapping("/update/{id}")
     public ResponseEntity<Person> updatePerson(@PathVariable("id") int id, @RequestBody @Valid Person person, BindingResult bindingResult) {
 
+        person.setId(id);
         if (peopleService.findById(id).isEmpty())
             bindingResult.rejectValue("id", "", "Person with this id wasn't found!");
 
@@ -81,14 +85,21 @@ public class PeopleController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        person.setId(id);
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         peopleService.update(person);
 
         return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
+    @ExceptionHandler
+    private ResponseEntity<ErrorResponse> handleException(HttpClientErrorException.Unauthorized e) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(e.getMessage());
+        response.setTimestamp(System.currentTimeMillis());
 
+        // В HTTP ответе тело ответа (response) и в заголовке статус
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler
     private ResponseEntity<ErrorResponse> handleException(NotFoundException e) {
@@ -109,5 +120,4 @@ public class PeopleController {
         // В HTTP ответе тело ответа (response) и в заголовке статус
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
-
 }

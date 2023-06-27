@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.services.CategoryTransactionsService;
@@ -21,7 +22,7 @@ import java.util.Optional;
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
 @RestController
-@CrossOrigin(origins = "http://127.0.0.1:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/categoryTransactions")
 public class CategoryTransactionsController {
 
@@ -90,6 +91,7 @@ public class CategoryTransactionsController {
     @PostMapping("/update/{id}")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@PathVariable("id") int id, @RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
 
+        categoryTransaction.setId(id);
         if (categoryTransactionsService.findById(id).isEmpty())
             bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");
 
@@ -98,7 +100,6 @@ public class CategoryTransactionsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        categoryTransaction.setId(id);
         categoryTransactionsService.update(categoryTransaction);
 
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
@@ -137,6 +138,16 @@ public class CategoryTransactionsController {
 
         // В HTTP ответе тело ответа (response) и в заголовке статус
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<ErrorResponse> handleException(HttpClientErrorException.Unauthorized e) {
+        ErrorResponse response = new ErrorResponse();
+        response.setMessage(e.getMessage());
+        response.setTimestamp(System.currentTimeMillis());
+
+        // В HTTP ответе тело ответа (response) и в заголовке статус
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
 }

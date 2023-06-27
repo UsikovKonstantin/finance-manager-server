@@ -30,6 +30,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private String refreshToken;
 
+    public static boolean Auth = false;
+
     @Autowired
     public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.repository = repository;
@@ -66,6 +68,7 @@ public class AuthenticationService {
             cookie.setHttpOnly(true);
             cookie.setMaxAge(500000);
             response.addCookie(cookie);
+            Auth = true;
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .person(person)
@@ -104,6 +107,7 @@ public class AuthenticationService {
             cookie.setHttpOnly(true);
             cookie.setMaxAge(500000);
             response.addCookie(cookie);
+            Auth = true;
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .person(person)
@@ -185,6 +189,8 @@ public class AuthenticationService {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        Auth = false;
         return null;
     }
 }
