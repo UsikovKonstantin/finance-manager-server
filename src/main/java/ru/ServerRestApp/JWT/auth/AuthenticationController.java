@@ -36,7 +36,7 @@ public class AuthenticationController {
     }*/
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@RequestBody  RefreshJwtRequest request, HttpServletResponse response) throws AuthException {
-        return ResponseEntity.ok(service.refresh(request.getRefreshToken(), response));
+    public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@CookieValue(value = "refreshToken", defaultValue = "")  String refreshToken, HttpServletResponse response) throws AuthException {
+        return ResponseEntity.ok(service.refresh(refreshToken, response));
     }
 }

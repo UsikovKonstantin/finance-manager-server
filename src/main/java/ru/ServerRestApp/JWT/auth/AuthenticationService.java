@@ -60,19 +60,13 @@ public class AuthenticationService {
             final String accessToken = jwtService.generateToken(person);
             final String refreshToken  = jwtService.generateRefreshToken(person);
             Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
-            if (token.isPresent()){
-                token.get().setAccessToken(accessToken);
-                token.get().setRefreshToken(refreshToken);
-                System.out.println("Вывод");
-            }
-            else{
-                var tokens = Tokens.builder()
-                        .email(person.getEmail())
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .build();
-                tokensRepository.save(tokens);
-            }
+            if (token.isPresent()){ tokensRepository.deleteById(token.get().getId()); }
+            var tokens = Tokens.builder()
+                    .email(person.getEmail())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+            tokensRepository.save(tokens);
             Cookie cookie = new Cookie("refreshToken", refreshToken);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
@@ -81,6 +75,7 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .refreshToken(refreshToken)
+                    .person(person)
                     .build();
     }
 
@@ -100,9 +95,9 @@ public class AuthenticationService {
             if (token.isPresent()){
                 token.get().setAccessToken(accessToken);
                 token.get().setRefreshToken(refreshToken);
-                System.out.println("Вывод");
+                tokensRepository.save(token.get());
             }
-            else{
+            else {
                 var tokens = Tokens.builder()
                         .email(person.getEmail())
                         .accessToken(accessToken)
@@ -110,6 +105,7 @@ public class AuthenticationService {
                         .build();
                 tokensRepository.save(tokens);
             }
+
             Cookie cookie = new Cookie("refreshToken", refreshToken);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
@@ -118,6 +114,7 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .refreshToken(refreshToken)
+                    .person(person)
                     .build();
         }
         catch (NoSuchElementException e){ return AuthenticationResponse.builder().error("Такого пользователя не существует").build(); }
@@ -152,21 +149,23 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().build();
     }*/
 
-    public AuthenticationResponse refresh(String refreshToken, HttpServletResponse response) throws AuthException {
+    public AuthenticationResponse refresh(String refreshToken, HttpServletResponse response){
         try {
             if (JwtService.validateRefreshToken(refreshToken)) {
                 final Claims claims = JwtService.getRefreshClaims(refreshToken);
                 final String login = claims.getSubject();
                 Optional<Tokens> tokens = tokensRepository.findByEmail(login);
                 final String saveRefreshToken = tokens.get().getRefreshtoken();
+                System.out.println(saveRefreshToken);
                 if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                    final Person user = repository.findByEmail(login)
+                    final Person person = repository.findByEmail(login)
                             .orElseThrow();
-                    final String accessToken = JwtService.generateToken(user);
-                    final String newRefreshToken = JwtService.generateRefreshToken(user);
+                    final String accessToken = JwtService.generateToken(person);
+                    final String newRefreshToken = JwtService.generateRefreshToken(person);
                     if (tokens.isPresent()){
                         tokens.get().setAccessToken(accessToken);
                         tokens.get().setRefreshToken(newRefreshToken);
+                        tokensRepository.save(tokens.get());
                     }
                     Cookie cookie = new Cookie("refreshToken", refreshToken);
                     cookie.setPath("/");
@@ -176,6 +175,7 @@ public class AuthenticationService {
                     return AuthenticationResponse.builder()
                             .token(accessToken)
                             .refreshToken(newRefreshToken)
+                            .person(person)
                             .build();
                 }
                 else return AuthenticationResponse.builder().error("Такого рефреш токена не существует").build();
