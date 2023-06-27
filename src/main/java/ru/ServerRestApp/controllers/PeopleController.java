@@ -8,10 +8,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
-import ru.ServerRestApp.JWT.auth.AuthenticationController;
-import ru.ServerRestApp.JWT.auth.AuthenticationService;
+import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
+import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
@@ -34,7 +34,7 @@ public class PeopleController {
     private final PasswordEncoder passwordEncoder;
     private final PersonValidator personValidator;
     @Autowired
-    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator) {
+    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository) {
         this.peopleService = peopleService;
         this.teamsService = teamsService;
         this.passwordEncoder = passwordEncoder;
