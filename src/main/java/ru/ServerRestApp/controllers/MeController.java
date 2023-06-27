@@ -28,8 +28,8 @@ public class MeController {
     }
 
     @GetMapping()
-    public ResponseEntity<Person> getMe(@RequestBody Tokens tokens) {
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(tokens.getAccessToken());
+    public ResponseEntity<Person> getMe(@RequestHeader("Authorization") String token) {
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
             throw new NotFoundException("Token wasn't found!");
 
