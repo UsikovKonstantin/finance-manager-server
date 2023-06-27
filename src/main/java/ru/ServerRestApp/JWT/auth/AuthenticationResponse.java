@@ -14,7 +14,6 @@ import ru.ServerRestApp.models.Person;
 public class AuthenticationResponse {
     private final String type = "Bearer";
     private  String token;
-    private String refreshToken;
     private String error;
     private Person person;
 }

@@ -1,7 +1,6 @@
 package ru.ServerRestApp.JWT.auth;
 
 import io.jsonwebtoken.*;
-import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,19 +9,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.pattern.PatternParseException;
 import ru.ServerRestApp.JWT.config.JwtService;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.JWT.repository.UserRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Tokens;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 @Service
 
@@ -74,7 +68,6 @@ public class AuthenticationService {
             response.addCookie(cookie);
             return AuthenticationResponse.builder()
                     .token(accessToken)
-                    .refreshToken(refreshToken)
                     .person(person)
                     .build();
     }
@@ -113,7 +106,6 @@ public class AuthenticationService {
             response.addCookie(cookie);
             return AuthenticationResponse.builder()
                     .token(accessToken)
-                    .refreshToken(refreshToken)
                     .person(person)
                     .build();
         }
@@ -167,14 +159,13 @@ public class AuthenticationService {
                         tokens.get().setRefreshToken(newRefreshToken);
                         tokensRepository.save(tokens.get());
                     }
-                    Cookie cookie = new Cookie("refreshToken", refreshToken);
+                    Cookie cookie = new Cookie("refreshToken", newRefreshToken);
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
                     cookie.setMaxAge(500000);
                     response.addCookie(cookie);
                     return AuthenticationResponse.builder()
                             .token(accessToken)
-                            .refreshToken(newRefreshToken)
                             .person(person)
                             .build();
                 }
@@ -187,5 +178,13 @@ public class AuthenticationService {
         catch (SignatureException e) { return AuthenticationResponse.builder().error("Недействительная подпись").build(); }
         catch (Exception e) { return AuthenticationResponse.builder().error("Невалидный токен").build(); }
         return AuthenticationResponse.builder().build();
+    }
+
+    public AuthenticationResponse logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        return null;
     }
 }

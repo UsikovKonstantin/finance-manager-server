@@ -39,4 +39,9 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@CookieValue(value = "refreshToken", defaultValue = "")  String refreshToken, HttpServletResponse response) throws AuthException {
         return ResponseEntity.ok(service.refresh(refreshToken, response));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthenticationResponse> logout(@CookieValue HttpServletResponse response){
+        return ResponseEntity.ok(service.logout(response));
+    }
 }
