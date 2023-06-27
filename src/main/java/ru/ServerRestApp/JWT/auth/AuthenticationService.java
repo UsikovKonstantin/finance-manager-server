@@ -3,6 +3,7 @@ package ru.ServerRestApp.JWT.auth;
 import io.jsonwebtoken.*;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -61,7 +62,7 @@ public class AuthenticationService {
                     .build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -74,10 +75,15 @@ public class AuthenticationService {
             final String accessToken = jwtService.generateToken(person);
             refreshToken  = jwtService.generateRefreshToken(person);
             refreshStorage.put(person.getEmail(), refreshToken);
+            Cookie cookie = new Cookie("refreshToken", refreshToken);
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setMaxAge(500000);
+            response.addCookie(cookie);
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .refreshToken(refreshToken)
-                    .cookie(new Cookie("refreshToken", refreshToken))
+                    .cookie(cookie)
                     .build();
         }
         catch (NoSuchElementException e){ return AuthenticationResponse.builder().error("Такого пользователя не существует").build(); }
@@ -113,7 +119,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().build();
     }
 
-    public AuthenticationResponse refresh(String refreshToken) throws AuthException {
+    public AuthenticationResponse refresh(String refreshToken, HttpServletResponse response) throws AuthException {
         try {
             if (JwtService.validateRefreshToken(refreshToken)) {
                 final Claims claims = JwtService.getRefreshClaims(refreshToken);
@@ -126,6 +132,11 @@ public class AuthenticationService {
                     final String accessToken = JwtService.generateToken(user);
                     final String newRefreshToken = JwtService.generateRefreshToken(user);
                     refreshStorage.put(user.getEmail(), newRefreshToken);
+                    Cookie cookie = new Cookie("refreshToken", refreshToken);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(true);
+                    cookie.setMaxAge(500000);
+                    response.addCookie(cookie);
                     return AuthenticationResponse.builder()
                             .token(accessToken)
                             .refreshToken(newRefreshToken)

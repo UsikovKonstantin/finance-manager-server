@@ -3,6 +3,7 @@ package ru.ServerRestApp.JWT.auth;
 
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +26,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody  AuthenticationRequest request){
-        return ResponseEntity.ok(service.authenticate(request));
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody  AuthenticationRequest request, HttpServletResponse response){
+        return ResponseEntity.ok(service.authenticate(request, response));
     }
 
     @PostMapping("/token")
@@ -35,7 +36,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@RequestBody  RefreshJwtRequest request) throws AuthException {
-        return ResponseEntity.ok(service.refresh(request.getRefreshToken()));
+    public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@RequestBody  RefreshJwtRequest request, HttpServletResponse response) throws AuthException {
+        return ResponseEntity.ok(service.refresh(request.getRefreshToken(), response));
     }
 }
