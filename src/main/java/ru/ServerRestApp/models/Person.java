@@ -58,22 +58,6 @@ public class Person implements UserDetails {
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
-/*
-    @OneToMany(mappedBy = "person")
-    private List<CategoryTransaction> categoryTransactions;
-
-    @OneToMany(mappedBy = "person_from")
-    private List<Invitation> invitations_from;
-
-    @OneToMany(mappedBy = "person_to")
-    private List<Invitation> invitations_to;
-
-    @OneToMany(mappedBy = "person_from")
-    private List<PersonTransaction> transactions_from;
-
-    @OneToMany(mappedBy = "person_to")
-    private List<PersonTransaction> transactions_to;
-*/
 
     public Person(String full_name, String email, String password, double balance,
                   String gender, String role, Team team, List<CategoryTransaction> categoryTransactions,
@@ -196,46 +180,6 @@ public class Person implements UserDetails {
     public void setTeam(Team team) {
         this.team = team;
     }
-/*
-    public List<CategoryTransaction> getCategoryTransactions() {
-        return categoryTransactions;
-    }
-
-    public void setCategoryTransactions(List<CategoryTransaction> categoryTransactions) {
-        this.categoryTransactions = categoryTransactions;
-    }
-
-    public List<Invitation> getInvitations_from() {
-        return invitations_from;
-    }
-
-    public void setInvitations_from(List<Invitation> invitations_from) {
-        this.invitations_from = invitations_from;
-    }
-
-    public List<Invitation> getInvitations_to() {
-        return invitations_to;
-    }
-
-    public void setInvitations_to(List<Invitation> invitations_to) {
-        this.invitations_to = invitations_to;
-    }
-
-    public List<PersonTransaction> getTransactions_from() {
-        return transactions_from;
-    }
-
-    public void setTransactions_from(List<PersonTransaction> transactions_from) {
-        this.transactions_from = transactions_from;
-    }
-
-    public List<PersonTransaction> getTransactions_to() {
-        return transactions_to;
-    }
-
-    public void setTransactions_to(List<PersonTransaction> transactions_to) {
-        this.transactions_to = transactions_to;
-    }*/
 
     @Override
     public String toString() {

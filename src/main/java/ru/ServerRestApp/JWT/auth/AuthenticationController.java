@@ -21,8 +21,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
-        return ResponseEntity.ok(service.register(request));
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletResponse response){
+        return ResponseEntity.ok(service.register(request, response));
     }
 
     @PostMapping("/authenticate")
@@ -30,10 +30,10 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.authenticate(request, response));
     }
 
-    @PostMapping("/token")
+    /*@PostMapping("/token")
     public ResponseEntity<AuthenticationResponse> getNewAccessToken(@RequestBody  RefreshJwtRequest  request){
         return ResponseEntity.ok(service.getAccessToken(request.getRefreshToken()));
-    }
+    }*/
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@RequestBody  RefreshJwtRequest request, HttpServletResponse response) throws AuthException {

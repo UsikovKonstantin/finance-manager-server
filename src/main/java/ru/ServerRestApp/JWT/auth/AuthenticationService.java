@@ -12,12 +12,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.pattern.PatternParseException;
 import ru.ServerRestApp.JWT.config.JwtService;
+import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.JWT.repository.UserRepository;
 import ru.ServerRestApp.models.Person;
+import ru.ServerRestApp.models.Tokens;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -26,22 +29,24 @@ import java.util.regex.PatternSyntaxException;
 public class AuthenticationService {
 
     private final UserRepository repository;
+
+    private final TokensRepository tokensRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final Map<String, String> refreshStorage = new HashMap<>();
     private String refreshToken;
 
     @Autowired
-    public AuthenticationService(UserRepository repository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.repository = repository;
+        this.tokensRepository = tokensRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
 
     }
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
             var person = Person.builder()
                     .team(request.getTeam())
                     .full_name(request.getName())
@@ -54,11 +59,28 @@ public class AuthenticationService {
             repository.save(person);
             final String accessToken = jwtService.generateToken(person);
             final String refreshToken  = jwtService.generateRefreshToken(person);
-            refreshStorage.put(person.getEmail(), refreshToken);
+            Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
+            if (token.isPresent()){
+                token.get().setAccessToken(accessToken);
+                token.get().setRefreshToken(refreshToken);
+                System.out.println("Вывод");
+            }
+            else{
+                var tokens = Tokens.builder()
+                        .email(person.getEmail())
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+                tokensRepository.save(tokens);
+            }
+            Cookie cookie = new Cookie("refreshToken", refreshToken);
+            cookie.setPath("/");
+            cookie.setHttpOnly(true);
+            cookie.setMaxAge(500000);
+            response.addCookie(cookie);
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .refreshToken(refreshToken)
-                    .cookie(new Cookie("refreshToken", refreshToken))
                     .build();
     }
 
@@ -74,7 +96,20 @@ public class AuthenticationService {
                     .orElseThrow();
             final String accessToken = jwtService.generateToken(person);
             refreshToken  = jwtService.generateRefreshToken(person);
-            refreshStorage.put(person.getEmail(), refreshToken);
+            Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
+            if (token.isPresent()){
+                token.get().setAccessToken(accessToken);
+                token.get().setRefreshToken(refreshToken);
+                System.out.println("Вывод");
+            }
+            else{
+                var tokens = Tokens.builder()
+                        .email(person.getEmail())
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+                tokensRepository.save(tokens);
+            }
             Cookie cookie = new Cookie("refreshToken", refreshToken);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
@@ -83,14 +118,13 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .refreshToken(refreshToken)
-                    .cookie(cookie)
                     .build();
         }
         catch (NoSuchElementException e){ return AuthenticationResponse.builder().error("Такого пользователя не существует").build(); }
         catch (ResponseStatusException e) { return AuthenticationResponse.builder().error("Неправильно введён логин или пароль").build(); }
     }
 
-    public AuthenticationResponse getAccessToken(String refreshToken) {
+    /*public AuthenticationResponse getAccessToken(String refreshToken) {
         try {
             if (JwtService.validateRefreshToken(refreshToken)) {
                 final Claims claims = JwtService.getRefreshClaims(refreshToken);
@@ -103,7 +137,6 @@ public class AuthenticationService {
                     return AuthenticationResponse.builder()
                             .token(accessToken)
                             .refreshToken(null)
-                            .cookie(new Cookie("refreshToken", null))
                             .build();
                 }
                 else {
@@ -117,21 +150,24 @@ public class AuthenticationService {
         catch (SignatureException e) { return AuthenticationResponse.builder().error("Недействительная подпись").build(); }
         catch (Exception e) { return AuthenticationResponse.builder().error("Невалидный токен").build(); }
         return AuthenticationResponse.builder().build();
-    }
+    }*/
 
     public AuthenticationResponse refresh(String refreshToken, HttpServletResponse response) throws AuthException {
         try {
             if (JwtService.validateRefreshToken(refreshToken)) {
                 final Claims claims = JwtService.getRefreshClaims(refreshToken);
                 final String login = claims.getSubject();
-                final String saveRefreshToken = refreshStorage.get(login);
+                Optional<Tokens> tokens = tokensRepository.findByEmail(login);
+                final String saveRefreshToken = tokens.get().getRefreshtoken();
                 if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
                     final Person user = repository.findByEmail(login)
                             .orElseThrow();
-
                     final String accessToken = JwtService.generateToken(user);
                     final String newRefreshToken = JwtService.generateRefreshToken(user);
-                    refreshStorage.put(user.getEmail(), newRefreshToken);
+                    if (tokens.isPresent()){
+                        tokens.get().setAccessToken(accessToken);
+                        tokens.get().setRefreshToken(newRefreshToken);
+                    }
                     Cookie cookie = new Cookie("refreshToken", refreshToken);
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
@@ -140,7 +176,6 @@ public class AuthenticationService {
                     return AuthenticationResponse.builder()
                             .token(accessToken)
                             .refreshToken(newRefreshToken)
-                            .cookie(new Cookie("refreshToken", newRefreshToken))
                             .build();
                 }
                 else return AuthenticationResponse.builder().error("Такого рефреш токена не существует").build();
