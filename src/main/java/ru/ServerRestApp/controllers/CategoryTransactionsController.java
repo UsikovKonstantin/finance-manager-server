@@ -6,12 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.services.CategoryTransactionsService;
 import ru.ServerRestApp.services.PeopleService;
+import ru.ServerRestApp.services.TeamsService;
+import ru.ServerRestApp.util.CategoryTransactionGroup;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
@@ -32,13 +33,15 @@ public class CategoryTransactionsController {
     private final CategoriesService categoriesService;
     private final CategoryTransactionValidator categoryTransactionValidator;
     private final TokensRepository tokensRepository;
+    private final TeamsService teamsService;
     @Autowired
-    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService, CategoryTransactionValidator categoryTransactionValidator, TokensRepository tokensRepository) {
+    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService, CategoryTransactionValidator categoryTransactionValidator, TokensRepository tokensRepository, TeamsService teamsService) {
         this.categoryTransactionsService = categoryTransactionsService;
         this.peopleService = peopleService;
         this.categoriesService = categoriesService;
         this.categoryTransactionValidator = categoryTransactionValidator;
         this.tokensRepository = tokensRepository;
+        this.teamsService = teamsService;
     }
 
 
@@ -49,13 +52,23 @@ public class CategoryTransactionsController {
     }
 
 
-    @GetMapping("/person/byId")
+    @GetMapping("/person")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestBody Person bodyPerson) {
         Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
         List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(bodyPerson.getId());
+        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
+    }
+
+    @GetMapping("/team")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestBody Team bodyTeam) {
+        Optional<Team> team = teamsService.findById(bodyTeam.getId());
+        if (team.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamId(bodyTeam.getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
@@ -75,6 +88,38 @@ public class CategoryTransactionsController {
         if (categoryTransaction.isEmpty())
             throw new NotFoundException("CategoryTransaction with this id wasn't found!");
         return new ResponseEntity<>(categoryTransaction.get(), HttpStatus.OK);
+    }
+
+    @GetMapping("/person/income")
+    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForPerson(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPerson(bodyPerson.getId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/person/expenses")
+    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForPerson(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPerson(bodyPerson.getId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/team/income")
+    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForGroup(@RequestBody Team bodyTeam) {
+        Optional<Team> team = teamsService.findById(bodyTeam.getId());
+        if (team.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroup(bodyTeam.getId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/team/expenses")
+    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForGroup(@RequestBody Team bodyTeam) {
+        Optional<Team> team = teamsService.findById(bodyTeam.getId());
+        if (team.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroup(bodyTeam.getId()), HttpStatus.OK);
     }
 
 

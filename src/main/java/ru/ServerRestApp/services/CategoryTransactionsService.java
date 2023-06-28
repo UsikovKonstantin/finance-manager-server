@@ -1,6 +1,7 @@
 package ru.ServerRestApp.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.CategoryTransaction;
@@ -9,11 +10,13 @@ import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.CategoriesRepository;
 import ru.ServerRestApp.repositories.CategoryTransactionsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
+import ru.ServerRestApp.util.CategoryTransactionGroup;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryTransactionsService {
@@ -45,8 +48,53 @@ public class CategoryTransactionsService {
     }
 
     @Transactional(readOnly = true)
+    public List<CategoryTransaction> findByPersonTeamId(int id) {
+        return categoryTransactionsRepository.findByPersonTeamId(id);
+    }
+
+    @Transactional(readOnly = true)
     public List<CategoryTransaction> findByCategoryId(int id) {
         return categoryTransactionsRepository.findByCategoryId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getPositiveTransactionsByCategoryForPerson(int personId) {
+
+        List<Object[]> results = categoryTransactionsRepository.getPositiveTransactionsByCategoryForPerson(personId);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getNegativeTransactionsByCategoryForPerson(int personId) {
+
+        List<Object[]> results = categoryTransactionsRepository.getNegativeTransactionsByCategoryForPerson(personId);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getPositiveTransactionsByCategoryForGroup(int groupId) {
+
+        List<Object[]> results = categoryTransactionsRepository.getPositiveTransactionsByCategoryForGroup(groupId);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getNegativeTransactionsByCategoryForGroup(int groupId) {
+
+        List<Object[]> results = categoryTransactionsRepository.getNegativeTransactionsByCategoryForGroup(groupId);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
     }
 
     @Transactional
