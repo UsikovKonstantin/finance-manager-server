@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.models.Category;
+import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
@@ -32,9 +33,9 @@ public class CategoriesController {
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategory(@PathVariable("id") int id) {
-        Optional<Category> category = categoriesService.findById(id);
+    @GetMapping("/byId")
+    public ResponseEntity<Category> getCategory(@RequestBody Category bodyCategory) {
+        Optional<Category> category = categoriesService.findById(bodyCategory.getId());
         if (category.isEmpty())
             throw new NotFoundException("Category with this id wasn't found!");
         return new ResponseEntity<>(category.get(), HttpStatus.OK);

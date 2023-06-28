@@ -8,6 +8,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
+import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.models.Tokens;
@@ -48,33 +49,34 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
-    @GetMapping("/personFrom/{id}")
-    public ResponseEntity<List<PersonTransaction>> getPersonTransactionsByPersonFromId(@PathVariable("id") int id) {
-        Optional<Person> person = peopleService.findById(id);
+    @GetMapping("/personFrom/byId")
+    public ResponseEntity<List<PersonTransaction>> getPersonTransactionsByPersonFromId(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
-        List<PersonTransaction> personTransactions = personTransactionsService.findByPersonFromId(id);
+        List<PersonTransaction> personTransactions = personTransactionsService.findByPersonFromId(bodyPerson.getId());
         return new ResponseEntity<>(personTransactions, HttpStatus.OK);
     }
 
-    @GetMapping("/personTo/{id}")
-    public ResponseEntity<List<PersonTransaction>> getPersonTransactionsByPersonToId(@PathVariable("id") int id) {
-        Optional<Person> person = peopleService.findById(id);
+    @GetMapping("/personTo/byId")
+    public ResponseEntity<List<PersonTransaction>> getPersonTransactionsByPersonToId(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
-        List<PersonTransaction> personTransactions = personTransactionsService.findByPersonToId(id);
+        List<PersonTransaction> personTransactions = personTransactionsService.findByPersonToId(bodyPerson.getId());
         return new ResponseEntity<>(personTransactions, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PersonTransaction> getPersonTransaction(@PathVariable("id") int id) {
-        Optional<PersonTransaction> personTransaction = personTransactionsService.findById(id);
+    @GetMapping("/byId")
+    public ResponseEntity<PersonTransaction> getPersonTransaction(@RequestBody PersonTransaction bodyPersonTransaction) {
+        Optional<PersonTransaction> personTransaction = personTransactionsService.findById(bodyPersonTransaction.getId());
         if (personTransaction.isEmpty())
             throw new NotFoundException("PersonTransaction with this id wasn't found!");
         return new ResponseEntity<>(personTransaction.get(), HttpStatus.OK);
     }
+
 
     @PostMapping("/add")
     public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestHeader("Authorization") String token,
@@ -103,14 +105,12 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update")
     public ResponseEntity<PersonTransaction> updatePersonTransaction(@RequestHeader("Authorization") String token,
-                                                                     @PathVariable("id") int id,
                                                                      @RequestBody @Valid PersonTransaction personTransaction,
                                                                      BindingResult bindingResult) {
 
-        personTransaction.setId(id);
-        if (personTransactionsService.findById(id).isEmpty())
+        if (personTransactionsService.findById(personTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "PersonTransaction with this id wasn't found!");
 
         personTransactionValidator.validate(personTransaction, bindingResult);
@@ -134,11 +134,11 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete")
     public ResponseEntity<PersonTransaction> deletePersonTransaction(@RequestHeader("Authorization") String token,
-                                                                     @PathVariable("id") int id) {
+                                                                     @RequestBody PersonTransaction bodyPersonTransaction) {
 
-        Optional<PersonTransaction> foundPersonTransaction = personTransactionsService.findById(id);
+        Optional<PersonTransaction> foundPersonTransaction = personTransactionsService.findById(bodyPersonTransaction.getId());
         if (foundPersonTransaction.isEmpty())
             throw new NotFoundException("PersonTransaction with this id wasn't found!");
 
@@ -150,10 +150,10 @@ public class PersonTransactionsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != personTransactionsService.findById(id).get().getPersonFrom().getId())
+        if (found_person.get().getId() != personTransactionsService.findById(bodyPersonTransaction.getId()).get().getPersonFrom().getId())
             throw new DataException("Attempt to change another person's data");
 
-        personTransactionsService.delete(id);
+        personTransactionsService.delete(bodyPersonTransaction.getId());
 
         return new ResponseEntity<>(foundPersonTransaction.get(), HttpStatus.OK);
     }

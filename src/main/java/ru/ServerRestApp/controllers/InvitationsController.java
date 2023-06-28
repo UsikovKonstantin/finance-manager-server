@@ -8,9 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
-import ru.ServerRestApp.models.Invitation;
-import ru.ServerRestApp.models.Person;
-import ru.ServerRestApp.models.Tokens;
+import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.InvitationsService;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.services.TeamsService;
@@ -48,33 +46,34 @@ public class InvitationsController {
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
-    @GetMapping("/personFrom/{id}")
-    public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@PathVariable("id") int id) {
-        Optional<Person> person = peopleService.findById(id);
+    @GetMapping("/personFrom/byId")
+    public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
-        List<Invitation> invitations = invitationsService.findByPersonFromId(id);
+        List<Invitation> invitations = invitationsService.findByPersonFromId(bodyPerson.getId());
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
-    @GetMapping("/personTo/{id}")
-    public ResponseEntity<List<Invitation>> getInvitationsByPersonToId(@PathVariable("id") int id) {
-        Optional<Person> person = peopleService.findById(id);
+    @GetMapping("/personTo/byId")
+    public ResponseEntity<List<Invitation>> getInvitationsByPersonToId(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
-        List<Invitation> invitations = invitationsService.findByPersonToId(id);
+        List<Invitation> invitations = invitationsService.findByPersonToId(bodyPerson.getId());
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Invitation> getInvitation(@PathVariable("id") int id) {
-        Optional<Invitation> invitation = invitationsService.findById(id);
+    @GetMapping("/byId")
+    public ResponseEntity<Invitation> getInvitation(@RequestBody Invitation bodyInvitation) {
+        Optional<Invitation> invitation = invitationsService.findById(bodyInvitation.getId());
         if (invitation.isEmpty())
             throw new NotFoundException("Invitation with this id wasn't found!");
         return new ResponseEntity<>(invitation.get(), HttpStatus.OK);
     }
+
 
     @PostMapping("/add")
     public ResponseEntity<Invitation> addInvitation(@RequestHeader("Authorization") String token,
@@ -103,15 +102,12 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update")
     public ResponseEntity<Invitation> updateInvitation(@RequestHeader("Authorization") String token,
-                                                       @PathVariable("id") int id,
                                                        @RequestBody @Valid Invitation invitation,
                                                        BindingResult bindingResult) {
 
-        invitation.setId(id);
-
-        if (invitationsService.findById(id).isEmpty())
+        if (invitationsService.findById(invitation.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "Invitation with this id wasn't found!");
 
         invitationValidator.validate(invitation, bindingResult);
@@ -135,11 +131,11 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete")
     public ResponseEntity<Invitation> deleteInvitation(@RequestHeader("Authorization") String token,
-                                                       @PathVariable("id") int id) {
+                                                       @RequestBody Invitation bodyInvitation) {
 
-        Optional<Invitation> foundInvitation = invitationsService.findById(id);
+        Optional<Invitation> foundInvitation = invitationsService.findById(bodyInvitation.getId());
         if (foundInvitation.isEmpty())
             throw new NotFoundException("Invitation with this id wasn't found!");
 
@@ -151,19 +147,19 @@ public class InvitationsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != invitationsService.findById(id).get().getPersonFrom().getId())
+        if (found_person.get().getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonFrom().getId())
             throw new DataException("Attempt to change another person's data");
 
-        invitationsService.delete(id);
+        invitationsService.delete(bodyInvitation.getId());
 
         return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
     }
 
-    @PostMapping("/accept/{id}")
+    @PostMapping("/accept")
     public ResponseEntity<Invitation> acceptInvitation(@RequestHeader("Authorization") String token,
-                                                       @PathVariable("id") int id) {
+                                                       @RequestBody Invitation bodyInvitation) {
 
-        Optional<Invitation> foundInvitation = invitationsService.findById(id);
+        Optional<Invitation> foundInvitation = invitationsService.findById(bodyInvitation.getId());
         if (foundInvitation.isEmpty())
             throw new NotFoundException("Invitation with this id wasn't found!");
 
@@ -175,10 +171,10 @@ public class InvitationsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != invitationsService.findById(id).get().getPersonFrom().getId())
+        if (found_person.get().getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonFrom().getId())
             throw new DataException("Attempt to change another person's data");
 
-        invitationsService.accept(id);
+        invitationsService.accept(bodyInvitation.getId());
 
         return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
     }

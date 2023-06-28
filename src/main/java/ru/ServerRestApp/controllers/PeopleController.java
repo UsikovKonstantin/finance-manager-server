@@ -49,38 +49,38 @@ public class PeopleController {
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
-    @GetMapping("/team/{id}")
-    public ResponseEntity<List<Person>> getPeopleByTeamId(@PathVariable("id") int id) {
-        Optional<Team> team = teamsService.findById(id);
+    @GetMapping("/team/byId")
+    public ResponseEntity<List<Person>> getPeopleByTeamId(@RequestBody Person bodyPerson) {
+        Optional<Team> team = teamsService.findById(bodyPerson.getId());
         if (team.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
 
-        List<Person> people = peopleService.findByTeamId(id);
+        List<Person> people = peopleService.findByTeamId(bodyPerson.getId());
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Person> getPerson(@PathVariable("id") int id) {
-        Optional<Person> person = peopleService.findById(id);
+    @GetMapping("/byId")
+    public ResponseEntity<Person> getPerson(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
         return new ResponseEntity<>(person.get(), HttpStatus.OK);
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<Person> getPersonByEmail(@PathVariable("email") String email) {
-        Optional<Person> person = peopleService.findByEmail(email);
+    @GetMapping("/email")
+    public ResponseEntity<Person> getPersonByEmail(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findByEmail(bodyPerson.getEmail());
         if (person.isEmpty())
             throw new NotFoundException("Person with this email wasn't found!");
         return new ResponseEntity<>(person.get(), HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<Person> updatePerson(@RequestHeader("Authorization") String token, @PathVariable("id") int id,
+
+    @PostMapping("/update")
+    public ResponseEntity<Person> updatePerson(@RequestHeader("Authorization") String token,
                                                @RequestBody @Valid Person person, BindingResult bindingResult) {
 
-        person.setId(id);
-        if (peopleService.findById(id).isEmpty())
+        if (peopleService.findById(person.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "Person with this id wasn't found!");
 
         personValidator.validate(person, bindingResult);
@@ -96,7 +96,7 @@ public class PeopleController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != id)
+        if (found_person.get().getId() != person.getId())
             throw new DataException("Attempt to change another person's data");
 
         person.setPassword(passwordEncoder.encode(person.getPassword()));
@@ -104,6 +104,7 @@ public class PeopleController {
 
         return new ResponseEntity<>(person, HttpStatus.OK);
     }
+
 
     @ExceptionHandler
     private ResponseEntity<ErrorResponse> handleException(NotFoundException e) {

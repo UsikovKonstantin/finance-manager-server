@@ -49,33 +49,34 @@ public class CategoryTransactionsController {
     }
 
 
-    @GetMapping("/person/{id}")
-    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@PathVariable("id") int id) {
-        Optional<Person> person = peopleService.findById(id);
+    @GetMapping("/person/byId")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestBody Person bodyPerson) {
+        Optional<Person> person = peopleService.findById(bodyPerson.getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(id);
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(bodyPerson.getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
-    @GetMapping("/category/{id}")
-    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByCategoryId(@PathVariable("id") int id) {
-        Optional<Category> category = categoriesService.findById(id);
+    @GetMapping("/category/byId")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByCategoryId(@RequestBody Category bodyCategory) {
+        Optional<Category> category = categoriesService.findById(bodyCategory.getId());
         if (category.isEmpty())
             throw new NotFoundException("Category with this id wasn't found!");
 
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByCategoryId(id);
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByCategoryId(bodyCategory.getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoryTransaction> getCategoryTransaction(@PathVariable("id") int id) {
-        Optional<CategoryTransaction> categoryTransaction = categoryTransactionsService.findById(id);
+    @GetMapping("/byId")
+    public ResponseEntity<CategoryTransaction> getCategoryTransaction(@RequestBody CategoryTransaction bodyCategoryTransaction) {
+        Optional<CategoryTransaction> categoryTransaction = categoryTransactionsService.findById(bodyCategoryTransaction.getId());
         if (categoryTransaction.isEmpty())
             throw new NotFoundException("CategoryTransaction with this id wasn't found!");
         return new ResponseEntity<>(categoryTransaction.get(), HttpStatus.OK);
     }
+
 
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestHeader("Authorization") String token,
@@ -104,13 +105,12 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@RequestHeader("Authorization") String token,
-                                                                         @PathVariable("id") int id, @RequestBody @Valid CategoryTransaction categoryTransaction,
+                                                                         @RequestBody @Valid CategoryTransaction categoryTransaction,
                                                                          BindingResult bindingResult) {
 
-        categoryTransaction.setId(id);
-        if (categoryTransactionsService.findById(id).isEmpty())
+        if (categoryTransactionsService.findById(categoryTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");
 
         categoryTransactionValidator.validate(categoryTransaction, bindingResult);
@@ -135,11 +135,11 @@ public class CategoryTransactionsController {
     }
 
 
-    @PostMapping("/delete/{id}")
+    @PostMapping("/delete")
     public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@RequestHeader("Authorization") String token,
-                                                                         @PathVariable("id") int id) {
+                                                                         @RequestBody CategoryTransaction bodyCategoryTransaction) {
 
-        Optional<CategoryTransaction> foundCategoryTransaction = categoryTransactionsService.findById(id);
+        Optional<CategoryTransaction> foundCategoryTransaction = categoryTransactionsService.findById(bodyCategoryTransaction.getId());
         if (foundCategoryTransaction.isEmpty())
             throw new NotFoundException("CategoryTransaction with this id wasn't found!");
 
@@ -151,10 +151,10 @@ public class CategoryTransactionsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != categoryTransactionsService.findById(id).get().getPerson().getId())
+        if (found_person.get().getId() != categoryTransactionsService.findById(bodyCategoryTransaction.getId()).get().getPerson().getId())
             throw new DataException("Attempt to change another person's data");
 
-        categoryTransactionsService.delete(id);
+        categoryTransactionsService.delete(bodyCategoryTransaction.getId());
 
         return new ResponseEntity<>(foundCategoryTransaction.get(), HttpStatus.OK);
     }

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import ru.ServerRestApp.models.CategoryTransaction;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
@@ -36,9 +37,9 @@ public class TeamsController {
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Team> getTeam(@PathVariable("id") int id) {
-        Optional<Team> team = teamsService.findById(id);
+    @GetMapping("/byId")
+    public ResponseEntity<Team> getTeam(@RequestBody Team bodyTeam) {
+        Optional<Team> team = teamsService.findById(bodyTeam.getId());
         if (team.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
         return new ResponseEntity<>(team.get(), HttpStatus.OK);
@@ -59,14 +60,13 @@ public class TeamsController {
     */
 
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<Team> updateTeam(@PathVariable("id") int id, @RequestBody @Valid Team team, BindingResult bindingResult) {
+    @PostMapping("/update")
+    public ResponseEntity<Team> updateTeam(@RequestBody @Valid Team team, BindingResult bindingResult) {
 
-        team.setId(id);
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<Team> foundTeam = teamsService.findById(id);
+        Optional<Team> foundTeam = teamsService.findById(team.getId());
         if (foundTeam.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
 
