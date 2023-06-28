@@ -53,22 +53,44 @@ public class CategoryTransactionsController {
 
 
     @GetMapping("/person")
-    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findById(bodyPerson.getId());
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestHeader("Authorization") String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
 
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(bodyPerson.getId());
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(found_person.get().getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
     @GetMapping("/team")
-    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestBody Team bodyTeam) {
-        Optional<Team> team = teamsService.findById(bodyTeam.getId());
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByTeamId(@RequestHeader("Authorization") String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        Optional<Team> team = teamsService.findById(person.get().getTeam().getId());
         if (team.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
 
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamId(bodyTeam.getId());
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamId(person.get().getTeam().getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
@@ -91,35 +113,71 @@ public class CategoryTransactionsController {
     }
 
     @GetMapping("/person/income")
-    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForPerson(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findById(bodyPerson.getId());
+    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForPerson(@RequestHeader("Authorization") String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPerson(bodyPerson.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPerson(found_person.get().getId()), HttpStatus.OK);
     }
 
     @GetMapping("/person/expenses")
-    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForPerson(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findById(bodyPerson.getId());
+    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForPerson(@RequestHeader("Authorization") String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
         if (person.isEmpty())
             throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPerson(bodyPerson.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPerson(found_person.get().getId()), HttpStatus.OK);
     }
 
     @GetMapping("/team/income")
-    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForGroup(@RequestBody Team bodyTeam) {
-        Optional<Team> team = teamsService.findById(bodyTeam.getId());
+    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForGroup(@RequestHeader("Authorization") String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
         if (team.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroup(bodyTeam.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroup(found_person.get().getTeam().getId()), HttpStatus.OK);
     }
 
     @GetMapping("/team/expenses")
-    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForGroup(@RequestBody Team bodyTeam) {
-        Optional<Team> team = teamsService.findById(bodyTeam.getId());
+    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForGroup(@RequestHeader("Authorization") String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
         if (team.isEmpty())
             throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroup(bodyTeam.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroup(found_person.get().getTeam().getId()), HttpStatus.OK);
     }
 
 
