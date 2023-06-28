@@ -205,15 +205,4 @@ public class InvitationsController {
         // В HTTP ответе тело ответа (response) и в заголовке статус
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
-
-    @ExceptionHandler
-    private ResponseEntity<ErrorResponse> handleException(HttpClientErrorException.Unauthorized e) {
-        ErrorResponse response = new ErrorResponse();
-        response.setMessage(e.getMessage());
-        response.setTimestamp(System.currentTimeMillis());
-
-        // В HTTP ответе тело ответа (response) и в заголовке статус
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
 }

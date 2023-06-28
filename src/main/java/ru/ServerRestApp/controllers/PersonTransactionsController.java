@@ -179,14 +179,4 @@ public class PersonTransactionsController {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler
-    private ResponseEntity<ErrorResponse> handleException(AuthenticationException e) {
-        ErrorResponse response = new ErrorResponse();
-        response.setMessage(e.getMessage());
-        response.setTimestamp(System.currentTimeMillis());
-
-        // В HTTP ответе тело ответа (response) и в заголовке статус
-        return new ResponseEntity<>(response, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
-    }
-
 }
