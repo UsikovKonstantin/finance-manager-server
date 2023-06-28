@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.services.CategoryTransactionsService;
@@ -30,12 +31,14 @@ public class CategoryTransactionsController {
     private final PeopleService peopleService;
     private final CategoriesService categoriesService;
     private final CategoryTransactionValidator categoryTransactionValidator;
+    private final TokensRepository tokensRepository;
     @Autowired
-    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService, CategoryTransactionValidator categoryTransactionValidator) {
+    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService, CategoryTransactionValidator categoryTransactionValidator, TokensRepository tokensRepository) {
         this.categoryTransactionsService = categoryTransactionsService;
         this.peopleService = peopleService;
         this.categoriesService = categoriesService;
         this.categoryTransactionValidator = categoryTransactionValidator;
+        this.tokensRepository = tokensRepository;
     }
 
 
@@ -75,12 +78,25 @@ public class CategoryTransactionsController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
+    public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestHeader("Authorization") String token,
+                                                                      @RequestBody @Valid CategoryTransaction categoryTransaction,
+                                                                      BindingResult bindingResult) {
 
         categoryTransactionValidator.validate(categoryTransaction, bindingResult);
 
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != categoryTransaction.getPerson().getId())
+            throw new DataException("Attempt to change another person's data");
 
         categoryTransaction.setId(0);
         categoryTransactionsService.save(categoryTransaction);
@@ -89,7 +105,9 @@ public class CategoryTransactionsController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@PathVariable("id") int id, @RequestBody @Valid CategoryTransaction categoryTransaction, BindingResult bindingResult) {
+    public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@RequestHeader("Authorization") String token,
+                                                                         @PathVariable("id") int id, @RequestBody @Valid CategoryTransaction categoryTransaction,
+                                                                         BindingResult bindingResult) {
 
         categoryTransaction.setId(id);
         if (categoryTransactionsService.findById(id).isEmpty())
@@ -100,6 +118,17 @@ public class CategoryTransactionsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != categoryTransaction.getPerson().getId())
+            throw new DataException("Attempt to change another person's data");
+
         categoryTransactionsService.update(categoryTransaction);
 
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
@@ -107,11 +136,23 @@ public class CategoryTransactionsController {
 
 
     @PostMapping("/delete/{id}")
-    public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@PathVariable("id") int id) {
+    public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@RequestHeader("Authorization") String token,
+                                                                         @PathVariable("id") int id) {
 
         Optional<CategoryTransaction> foundCategoryTransaction = categoryTransactionsService.findById(id);
         if (foundCategoryTransaction.isEmpty())
             throw new NotFoundException("CategoryTransaction with this id wasn't found!");
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != categoryTransactionsService.findById(id).get().getPerson().getId())
+            throw new DataException("Attempt to change another person's data");
 
         categoryTransactionsService.delete(id);
 

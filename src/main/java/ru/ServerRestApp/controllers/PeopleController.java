@@ -33,12 +33,14 @@ public class PeopleController {
     private final TeamsService teamsService;
     private final PasswordEncoder passwordEncoder;
     private final PersonValidator personValidator;
+    private final TokensRepository tokensRepository;
     @Autowired
-    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository) {
+    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository, TokensRepository tokensRepository1) {
         this.peopleService = peopleService;
         this.teamsService = teamsService;
         this.passwordEncoder = passwordEncoder;
         this.personValidator = personValidator;
+        this.tokensRepository = tokensRepository1;
     }
 
     @GetMapping()
@@ -74,7 +76,8 @@ public class PeopleController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<Person> updatePerson(@PathVariable("id") int id, @RequestBody @Valid Person person, BindingResult bindingResult) {
+    public ResponseEntity<Person> updatePerson(@RequestHeader("Authorization") String token, @PathVariable("id") int id,
+                                               @RequestBody @Valid Person person, BindingResult bindingResult) {
 
         person.setId(id);
         if (peopleService.findById(id).isEmpty())
@@ -84,6 +87,17 @@ public class PeopleController {
 
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != id)
+            throw new DataException("Attempt to change another person's data");
 
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         peopleService.update(person);

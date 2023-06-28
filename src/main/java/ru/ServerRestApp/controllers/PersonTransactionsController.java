@@ -7,9 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
+import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.PersonTransaction;
+import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.services.PersonTransactionsService;
 import ru.ServerRestApp.util.ErrorResponse;
@@ -31,11 +32,13 @@ public class PersonTransactionsController {
     private final PersonTransactionsService personTransactionsService;
     private final PeopleService peopleService;
     private final PersonTransactionValidator personTransactionValidator;
+    private final TokensRepository tokensRepository;
     @Autowired
-    public PersonTransactionsController(PersonTransactionsService personTransactionsService, PeopleService peopleService, PersonValidator personValidator, PersonTransactionValidator personTransactionValidator) {
+    public PersonTransactionsController(PersonTransactionsService personTransactionsService, PeopleService peopleService, PersonValidator personValidator, PersonTransactionValidator personTransactionValidator, TokensRepository tokensRepository) {
         this.personTransactionsService = personTransactionsService;
         this.peopleService = peopleService;
         this.personTransactionValidator = personTransactionValidator;
+        this.tokensRepository = tokensRepository;
     }
 
 
@@ -74,12 +77,25 @@ public class PersonTransactionsController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
+    public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestHeader("Authorization") String token,
+                                                                  @RequestBody @Valid PersonTransaction personTransaction,
+                                                                  BindingResult bindingResult) {
 
         personTransactionValidator.validate(personTransaction, bindingResult);
 
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != personTransaction.getPersonFrom().getId())
+            throw new DataException("Attempt to change another person's data");
 
         personTransaction.setId(0);
         personTransactionsService.save(personTransaction);
@@ -88,7 +104,10 @@ public class PersonTransactionsController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<PersonTransaction> updatePersonTransaction(@PathVariable("id") int id, @RequestBody @Valid PersonTransaction personTransaction, BindingResult bindingResult) {
+    public ResponseEntity<PersonTransaction> updatePersonTransaction(@RequestHeader("Authorization") String token,
+                                                                     @PathVariable("id") int id,
+                                                                     @RequestBody @Valid PersonTransaction personTransaction,
+                                                                     BindingResult bindingResult) {
 
         personTransaction.setId(id);
         if (personTransactionsService.findById(id).isEmpty())
@@ -99,17 +118,40 @@ public class PersonTransactionsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != personTransaction.getPersonFrom().getId())
+            throw new DataException("Attempt to change another person's data");
+
         personTransactionsService.update(personTransaction);
 
         return new ResponseEntity<>(personTransaction, HttpStatus.OK);
     }
 
     @PostMapping("/delete/{id}")
-    public ResponseEntity<PersonTransaction> deletePersonTransaction(@PathVariable("id") int id) {
+    public ResponseEntity<PersonTransaction> deletePersonTransaction(@RequestHeader("Authorization") String token,
+                                                                     @PathVariable("id") int id) {
 
         Optional<PersonTransaction> foundPersonTransaction = personTransactionsService.findById(id);
         if (foundPersonTransaction.isEmpty())
             throw new NotFoundException("PersonTransaction with this id wasn't found!");
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        if (found_person.get().getId() != personTransactionsService.findById(id).get().getPersonFrom().getId())
+            throw new DataException("Attempt to change another person's data");
 
         personTransactionsService.delete(id);
 
