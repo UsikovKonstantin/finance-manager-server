@@ -18,6 +18,7 @@ import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 import ru.ServerRestApp.validators.CategoryTransactionValidator;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -182,12 +183,147 @@ public class CategoryTransactionsController {
     }
 
 
+
+    @GetMapping("/person/month")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonIdForMonth(@RequestHeader("Authorization") String token,
+                                                                                               @RequestParam("timestamp") long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(timestamp));
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonIdForMonth(found_person.get().getId(),calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
+        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
+    }
+
+    @GetMapping("/team/month")
+    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByTeamId(@RequestHeader("Authorization") String token,
+                                                                                     @RequestParam("timestamp") long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(timestamp));
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        Optional<Team> team = teamsService.findById(person.get().getTeam().getId());
+        if (team.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamIdForMonth(person.get().getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
+        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
+    }
+
+    @GetMapping("/person/income/month")
+    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForPersonForMonth(@RequestHeader("Authorization") String token,
+                                                                                                             @RequestParam("timestamp") long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(timestamp));
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPersonForMonth(found_person.get().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+    }
+
+    @GetMapping("/person/expenses/month")
+    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForPersonForMonth(@RequestHeader("Authorization") String token,
+                                                                                                             @RequestParam("timestamp") long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(timestamp));
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPersonForMonth(found_person.get().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+    }
+
+    @GetMapping("/team/income/month")
+    public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForGroupForMonth(@RequestHeader("Authorization") String token,
+                                                                                                            @RequestParam("timestamp") long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(timestamp));
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
+        if (team.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroupForMonth(found_person.get().getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+    }
+
+    @GetMapping("/team/expenses/month")
+    public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForGroupForMonth(@RequestHeader("Authorization") String token,
+                                                                                                            @RequestParam("timestamp") long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(timestamp));
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
+        if (team.isEmpty())
+            throw new NotFoundException("Team with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroupForMonth(found_person.get().getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+    }
+
+
+
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestHeader("Authorization") String token,
-                                                                      @RequestParam("timestamp") long timestamp,
                                                                       @RequestBody @Valid CategoryTransaction categoryTransaction,
                                                                       BindingResult bindingResult) {
-        categoryTransaction.setCreated_at(new Date(timestamp));
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -212,10 +348,8 @@ public class CategoryTransactionsController {
 
     @PostMapping("/update")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@RequestHeader("Authorization") String token,
-                                                                         @RequestParam("timestamp") long timestamp,
                                                                          @RequestBody @Valid CategoryTransaction categoryTransaction,
                                                                          BindingResult bindingResult) {
-        categoryTransaction.setCreated_at(new Date(timestamp));
 
         if (categoryTransactionsService.findById(categoryTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");

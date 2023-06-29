@@ -97,6 +97,60 @@ public class CategoryTransactionsService {
                 .collect(Collectors.toList());
     }
 
+
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransaction> findByPersonIdForMonth(int id, int year, int month) {
+        return categoryTransactionsRepository.findByPersonIdForMonth(id, year, month);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransaction> findByPersonTeamIdForMonth(int id, int year, int month) {
+        return categoryTransactionsRepository.findByPersonTeamIdForMonth(id, year, month);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getPositiveTransactionsByCategoryForPersonForMonth(int personId, int month, int year) {
+
+        List<Object[]> results = categoryTransactionsRepository.getPositiveTransactionsByCategoryForPersonForMonth(personId, month, year);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getNegativeTransactionsByCategoryForPersonForMonth(int personId, int month, int year) {
+
+        List<Object[]> results = categoryTransactionsRepository.getNegativeTransactionsByCategoryForPersonForMonth(personId, month, year);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getPositiveTransactionsByCategoryForGroupForMonth(int groupId, int month, int year) {
+
+        List<Object[]> results = categoryTransactionsRepository.getPositiveTransactionsByCategoryForGroupForMonth(groupId, month, year);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransactionGroup> getNegativeTransactionsByCategoryForGroupForMonth(int groupId, int month, int year) {
+
+        List<Object[]> results = categoryTransactionsRepository.getNegativeTransactionsByCategoryForGroupForMonth(groupId, month, year);
+
+        return results.stream()
+                .map(obj -> new CategoryTransactionGroup((String) obj[0], (double) obj[1]))
+                .collect(Collectors.toList());
+    }
+
+
+
     @Transactional
     public void save(CategoryTransaction categoryTransaction) {
         if (categoryTransaction.getPerson() != null)

@@ -81,10 +81,8 @@ public class PersonTransactionsController {
 
     @PostMapping("/add")
     public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestHeader("Authorization") String token,
-                                                                  @RequestParam("timestamp") long timestamp,
                                                                   @RequestBody @Valid PersonTransaction personTransaction,
                                                                   BindingResult bindingResult) {
-        personTransaction.setCreated_at(new Date(timestamp));
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -109,10 +107,8 @@ public class PersonTransactionsController {
 
     @PostMapping("/update")
     public ResponseEntity<PersonTransaction> updatePersonTransaction(@RequestHeader("Authorization") String token,
-                                                                     @RequestParam("timestamp") long timestamp,
                                                                      @RequestBody @Valid PersonTransaction personTransaction,
                                                                      BindingResult bindingResult) {
-        personTransaction.setCreated_at(new Date(timestamp));
 
         if (personTransactionsService.findById(personTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "PersonTransaction with this id wasn't found!");

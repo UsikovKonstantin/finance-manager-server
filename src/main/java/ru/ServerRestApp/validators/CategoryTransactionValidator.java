@@ -8,7 +8,6 @@ import ru.ServerRestApp.models.CategoryTransaction;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.services.CategoryTransactionsService;
 import ru.ServerRestApp.services.PeopleService;
-import ru.ServerRestApp.util.DataException;
 
 @Component
 public class CategoryTransactionValidator implements Validator {
@@ -44,7 +43,7 @@ public class CategoryTransactionValidator implements Validator {
         else if (categoriesService.findById(categoryTransaction.getCategory().getId()).isEmpty())
             errors.rejectValue("category", "", "Category with this id wasn't found!");
 
-        if (categoryTransaction.getCreated_at() == null)
+        if (categoryTransaction.getCreatedAt() == null)
             errors.rejectValue("created_at", "", "Created_at must not be null!");
 
         if (categoryTransaction.getAmount() == 0)
