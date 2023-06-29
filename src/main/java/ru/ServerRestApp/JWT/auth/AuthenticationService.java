@@ -13,7 +13,9 @@ import ru.ServerRestApp.JWT.config.JwtService;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.JWT.repository.UserRepository;
 import ru.ServerRestApp.models.Person;
+import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.models.Tokens;
+import ru.ServerRestApp.repositories.TeamsRepository;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -25,6 +27,7 @@ public class AuthenticationService {
     private final UserRepository repository;
 
     private final TokensRepository tokensRepository;
+    private final TeamsRepository teamsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -33,9 +36,10 @@ public class AuthenticationService {
     public static boolean Auth = false;
 
     @Autowired
-    public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, TeamsRepository teamsRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.repository = repository;
         this.tokensRepository = tokensRepository;
+        this.teamsRepository = teamsRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -43,14 +47,21 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
+            var teams = Team.builder()
+                    .name("Новая группа")
+                    .build();
+            int id = teamsRepository.save(teams).getId();
+            Optional<Team> team = teamsRepository.findById(teams.getId());
+            team.get().setName("Группа " + id);
+            teamsRepository.save(team.get());
             var person = Person.builder()
-                    .team(request.getTeam())
+                    .team(team.get())
                     .full_name(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .balance(request.getBalance())
                     .gender(request.getGender())
-                    .role(request.getRole())
+                    .role("ROLE_LEADER")
                     .build();
             repository.save(person);
             final String accessToken = jwtService.generateToken(person);
