@@ -3,8 +3,9 @@ package ru.ServerRestApp.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.Person;
-import ru.ServerRestApp.models.Team;
+import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.TeamsRepository;
 
@@ -16,10 +17,12 @@ public class PeopleService {
 
     private final PeopleRepository peopleRepository;
     private final TeamsRepository teamsRepository;
+    private final TokensRepository tokensRepository;
     @Autowired
-    public PeopleService(PeopleRepository peopleRepository, TeamsRepository teamsRepository) {
+    public PeopleService(PeopleRepository peopleRepository, TeamsRepository teamsRepository, TokensRepository tokensRepository) {
         this.peopleRepository = peopleRepository;
         this.teamsRepository = teamsRepository;
+        this.tokensRepository = tokensRepository;
     }
 
 
@@ -56,6 +59,15 @@ public class PeopleService {
     public void update(Person person) {
         if (person.getTeam() != null)
             person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
+
+        Person found_person = peopleRepository.findById(person.getId()).get();
+        if (!found_person.getEmail().equals(person.getEmail())) {
+            Optional<Tokens> tokens = tokensRepository.findByEmail(found_person.getEmail());
+            if (tokens.isPresent()) {
+                tokens.get().setEmail(person.getEmail());
+                tokensRepository.save(tokens.get());
+            }
+        }
 
         int id = peopleRepository.save(person).getId();
         person.setId(id);
