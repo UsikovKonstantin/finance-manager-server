@@ -59,7 +59,7 @@ public class AuthenticationService {
                     .full_name(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .balance(request.getBalance())
+                    .balance(0)
                     .gender(request.getGender())
                     .role("ROLE_LEADER")
                     .build();
