@@ -101,12 +101,12 @@ public class CategoryTransactionsService {
 
     @Transactional(readOnly = true)
     public List<CategoryTransaction> findByPersonIdForMonth(int id, int year, int month) {
-        return categoryTransactionsRepository.findByPersonIdForMonth(id, year, month);
+        return categoryTransactionsRepository.findByPersonIdForMonth(id, month, year);
     }
 
     @Transactional(readOnly = true)
     public List<CategoryTransaction> findByPersonTeamIdForMonth(int id, int year, int month) {
-        return categoryTransactionsRepository.findByPersonTeamIdForMonth(id, year, month);
+        return categoryTransactionsRepository.findByPersonTeamIdForMonth(id, month, year);
     }
 
     @Transactional(readOnly = true)
