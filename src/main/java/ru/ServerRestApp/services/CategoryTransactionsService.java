@@ -1,6 +1,8 @@
 package ru.ServerRestApp.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -149,6 +151,18 @@ public class CategoryTransactionsService {
                 .collect(Collectors.toList());
     }
 
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransaction> findNLastPositiveTransactionsForPerson(int id, int n) {
+        Pageable pageable = PageRequest.of(0, n);
+        return categoryTransactionsRepository.findNLastPositiveTransactionsForPerson(id, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryTransaction> findNLastNegativeTransactionsForPerson(int id, int n) {
+        Pageable pageable = PageRequest.of(0, n);
+        return categoryTransactionsRepository.findNLastNegativeTransactionsForPerson(id, pageable);
+    }
 
 
     @Transactional

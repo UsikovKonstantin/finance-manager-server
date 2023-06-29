@@ -320,6 +320,45 @@ public class CategoryTransactionsController {
 
 
 
+    @GetMapping("/person/income/last")
+    public ResponseEntity<List<CategoryTransaction>> findNLastPositiveTransactionsForPerson(@RequestHeader("Authorization") String token,
+                                                                                            @RequestParam("limit") int limit) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.findNLastPositiveTransactionsForPerson(found_person.get().getId(), limit), HttpStatus.OK);
+    }
+
+    @GetMapping("/person/expenses/last")
+    public ResponseEntity<List<CategoryTransaction>> findNLastNegativeTransactionsForPerson(@RequestHeader("Authorization") String token,
+                                                                                                     @RequestParam("limit") int limit) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        Optional<Person> person = peopleService.findById(found_person.get().getId());
+        if (person.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+        return new ResponseEntity<>(categoryTransactionsService.findNLastNegativeTransactionsForPerson(found_person.get().getId(), limit), HttpStatus.OK);
+    }
+
+
+
+
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestHeader("Authorization") String token,
                                                                       @RequestBody @Valid CategoryTransaction categoryTransaction,
