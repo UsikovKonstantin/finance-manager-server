@@ -18,6 +18,7 @@ import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 import ru.ServerRestApp.validators.CategoryTransactionValidator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -183,13 +184,10 @@ public class CategoryTransactionsController {
 
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestHeader("Authorization") String token,
+                                                                      @RequestParam("timestamp") long timestamp,
                                                                       @RequestBody @Valid CategoryTransaction categoryTransaction,
                                                                       BindingResult bindingResult) {
-
-        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
+        categoryTransaction.setCreated_at(new Date(timestamp));
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -199,8 +197,12 @@ public class CategoryTransactionsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != categoryTransaction.getPerson().getId())
-            throw new DataException("Attempt to change another person's data");
+        categoryTransaction.setPerson(found_person.get());
+
+        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
+
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         categoryTransaction.setId(0);
         categoryTransactionsService.save(categoryTransaction);
@@ -210,16 +212,13 @@ public class CategoryTransactionsController {
 
     @PostMapping("/update")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@RequestHeader("Authorization") String token,
+                                                                         @RequestParam("timestamp") long timestamp,
                                                                          @RequestBody @Valid CategoryTransaction categoryTransaction,
                                                                          BindingResult bindingResult) {
+        categoryTransaction.setCreated_at(new Date(timestamp));
 
         if (categoryTransactionsService.findById(categoryTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");
-
-        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -229,8 +228,12 @@ public class CategoryTransactionsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != categoryTransaction.getPerson().getId())
-            throw new DataException("Attempt to change another person's data");
+        categoryTransaction.setPerson(found_person.get());
+
+        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
+
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         categoryTransactionsService.update(categoryTransaction);
 

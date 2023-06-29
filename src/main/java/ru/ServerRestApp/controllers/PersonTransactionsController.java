@@ -20,6 +20,7 @@ import ru.ServerRestApp.util.NotFoundException;
 import ru.ServerRestApp.validators.PersonTransactionValidator;
 import ru.ServerRestApp.validators.PersonValidator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,13 +81,10 @@ public class PersonTransactionsController {
 
     @PostMapping("/add")
     public ResponseEntity<PersonTransaction> addPersonTransaction(@RequestHeader("Authorization") String token,
+                                                                  @RequestParam("timestamp") long timestamp,
                                                                   @RequestBody @Valid PersonTransaction personTransaction,
                                                                   BindingResult bindingResult) {
-
-        personTransactionValidator.validate(personTransaction, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
+        personTransaction.setCreated_at(new Date(timestamp));
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -96,8 +94,12 @@ public class PersonTransactionsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != personTransaction.getPersonFrom().getId())
-            throw new DataException("Attempt to change another person's data");
+        personTransaction.setPersonFrom(found_person.get());
+
+        personTransactionValidator.validate(personTransaction, bindingResult);
+
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         personTransaction.setId(0);
         personTransactionsService.save(personTransaction);
@@ -107,16 +109,13 @@ public class PersonTransactionsController {
 
     @PostMapping("/update")
     public ResponseEntity<PersonTransaction> updatePersonTransaction(@RequestHeader("Authorization") String token,
+                                                                     @RequestParam("timestamp") long timestamp,
                                                                      @RequestBody @Valid PersonTransaction personTransaction,
                                                                      BindingResult bindingResult) {
+        personTransaction.setCreated_at(new Date(timestamp));
 
         if (personTransactionsService.findById(personTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "PersonTransaction with this id wasn't found!");
-
-        personTransactionValidator.validate(personTransaction, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -126,8 +125,12 @@ public class PersonTransactionsController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != personTransaction.getPersonFrom().getId())
-            throw new DataException("Attempt to change another person's data");
+        personTransaction.setPersonFrom(found_person.get());
+
+        personTransactionValidator.validate(personTransaction, bindingResult);
+
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
 
         personTransactionsService.update(personTransaction);
 
