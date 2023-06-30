@@ -1,6 +1,7 @@
 package ru.ServerRestApp.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
@@ -18,11 +19,13 @@ public class PeopleService {
     private final PeopleRepository peopleRepository;
     private final TeamsRepository teamsRepository;
     private final TokensRepository tokensRepository;
+    private final PasswordEncoder passwordEncoder;
     @Autowired
-    public PeopleService(PeopleRepository peopleRepository, TeamsRepository teamsRepository, TokensRepository tokensRepository) {
+    public PeopleService(PeopleRepository peopleRepository, TeamsRepository teamsRepository, TokensRepository tokensRepository, PasswordEncoder passwordEncoder) {
         this.peopleRepository = peopleRepository;
         this.teamsRepository = teamsRepository;
         this.tokensRepository = tokensRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -56,7 +59,7 @@ public class PeopleService {
     }
 
     @Transactional
-    public void update(Person person) {
+    public void update(Person person, boolean changePassword) {
         //if (person.getTeam() != null)
         //    person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
 
@@ -71,7 +74,9 @@ public class PeopleService {
         found_person.setFull_name(person.getFull_name());
         found_person.setEmail(person.getEmail());
         found_person.setGender(person.getGender());
-        found_person.setPassword(person.getPassword());
+        if (changePassword)
+            found_person.setPassword(person.getPassword());
+
 
         peopleRepository.save(found_person);
         //int id = peopleRepository.save(person).getId();

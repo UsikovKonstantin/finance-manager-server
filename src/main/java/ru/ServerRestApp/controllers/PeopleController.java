@@ -85,6 +85,12 @@ public class PeopleController {
 
         BindingResult bindingResult = new BeanPropertyBindingResult(person, "person");
         person.setRole("ROLE_USER");
+        boolean changePassword = true;
+        if ("".equals(person.getPassword())) {
+            changePassword = false;
+            person.setPassword("***");
+        }
+
         validator.validate(person, bindingResult);
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
@@ -102,7 +108,7 @@ public class PeopleController {
             returnDataErrorsToClient(bindingResult);
 
         person.setPassword(passwordEncoder.encode(person.getPassword()));
-        peopleService.update(person);
+        peopleService.update(person, changePassword);
 
         return new ResponseEntity<>(peopleService.findById(found_person.get().getId()).get(), HttpStatus.OK);
     }
