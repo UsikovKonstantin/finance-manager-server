@@ -57,8 +57,8 @@ public class PeopleService {
 
     @Transactional
     public void update(Person person) {
-        if (person.getTeam() != null)
-            person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
+        //if (person.getTeam() != null)
+        //    person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
 
         Person found_person = peopleRepository.findById(person.getId()).get();
         if (!found_person.getEmail().equals(person.getEmail())) {
@@ -68,9 +68,15 @@ public class PeopleService {
                 tokensRepository.save(tokens.get());
             }
         }
+        found_person.setFull_name(person.getFull_name());
+        found_person.setEmail(person.getEmail());
+        found_person.setGender(person.getGender());
+        found_person.setPassword(person.getPassword());
+        found_person.setRole(person.getRole());
 
-        int id = peopleRepository.save(person).getId();
-        person.setId(id);
+        peopleRepository.save(found_person);
+        //int id = peopleRepository.save(person).getId();
+        //person.setId(id);
     }
 
     @Transactional

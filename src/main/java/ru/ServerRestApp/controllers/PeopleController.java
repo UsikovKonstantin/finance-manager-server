@@ -80,14 +80,6 @@ public class PeopleController {
     public ResponseEntity<Person> updatePerson(@RequestHeader("Authorization") String token,
                                                @RequestBody @Valid Person person, BindingResult bindingResult) {
 
-        if (peopleService.findById(person.getId()).isEmpty())
-            bindingResult.rejectValue("id", "", "Person with this id wasn't found!");
-
-        personValidator.validate(person, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
-
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
             throw new NotFoundException("Token wasn't found!");
@@ -96,13 +88,18 @@ public class PeopleController {
         if (found_person.isEmpty())
             throw new NotFoundException("Person wasn't found!");
 
-        if (found_person.get().getId() != person.getId())
-            throw new DataException("Attempt to change another person's data");
+        person.setId(found_person.get().getId());
+        personValidator.validate(person, bindingResult);
+
+        if (bindingResult.hasErrors())
+            returnDataErrorsToClient(bindingResult);
+
+
 
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         peopleService.update(person);
 
-        return new ResponseEntity<>(person, HttpStatus.OK);
+        return new ResponseEntity<>(peopleService.findById(found_person.get().getId()).get(), HttpStatus.OK);
     }
 
 

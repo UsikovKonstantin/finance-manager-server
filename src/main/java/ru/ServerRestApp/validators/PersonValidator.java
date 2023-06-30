@@ -36,10 +36,10 @@ public class PersonValidator implements Validator {
 
         Person person = (Person)target;
 
-        if (person.getTeam() == null)
-            errors.rejectValue("team", "", "Team must not be null!");
-        else if (teamsService.findById(person.getTeam().getId()).isEmpty())
-            errors.rejectValue("team", "", "Team with this id wasn't found!");
+        //if (person.getTeam() == null)
+        //    errors.rejectValue("team", "", "Team must not be null!");
+        //else if (teamsService.findById(person.getTeam().getId()).isEmpty())
+        //    errors.rejectValue("team", "", "Team with this id wasn't found!");
 
         Optional<Person> found_person = peopleService.findByEmail(person.getEmail());
         if (found_person.isPresent() && found_person.get().getId() != person.getId())
