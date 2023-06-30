@@ -72,7 +72,6 @@ public class PeopleService {
         found_person.setEmail(person.getEmail());
         found_person.setGender(person.getGender());
         found_person.setPassword(person.getPassword());
-        found_person.setRole(person.getRole());
 
         peopleRepository.save(found_person);
         //int id = peopleRepository.save(person).getId();

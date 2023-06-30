@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
@@ -34,13 +35,15 @@ public class PeopleController {
     private final PasswordEncoder passwordEncoder;
     private final PersonValidator personValidator;
     private final TokensRepository tokensRepository;
+    private final Validator validator;
     @Autowired
-    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository, TokensRepository tokensRepository1) {
+    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository, TokensRepository tokensRepository1, Validator validator) {
         this.peopleService = peopleService;
         this.teamsService = teamsService;
         this.passwordEncoder = passwordEncoder;
         this.personValidator = personValidator;
         this.tokensRepository = tokensRepository1;
+        this.validator = validator;
     }
 
     @GetMapping()
@@ -78,7 +81,11 @@ public class PeopleController {
 
     @PostMapping("/update")
     public ResponseEntity<Person> updatePerson(@RequestHeader("Authorization") String token,
-                                               @RequestBody @Valid Person person, BindingResult bindingResult) {
+                                               @RequestBody Person person) {
+
+        BindingResult bindingResult = new BeanPropertyBindingResult(person, "person");
+        person.setRole("ROLE_USER");
+        validator.validate(person, bindingResult);
 
         Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
         if (found_tokens.isEmpty())
@@ -93,8 +100,6 @@ public class PeopleController {
 
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
-
-
 
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         peopleService.update(person);

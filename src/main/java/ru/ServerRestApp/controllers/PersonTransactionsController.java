@@ -4,11 +4,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
-import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.models.Tokens;
@@ -20,7 +19,6 @@ import ru.ServerRestApp.util.NotFoundException;
 import ru.ServerRestApp.validators.PersonTransactionValidator;
 import ru.ServerRestApp.validators.PersonValidator;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +34,7 @@ public class PersonTransactionsController {
     private final PersonTransactionValidator personTransactionValidator;
     private final TokensRepository tokensRepository;
     @Autowired
-    public PersonTransactionsController(PersonTransactionsService personTransactionsService, PeopleService peopleService, PersonValidator personValidator, PersonTransactionValidator personTransactionValidator, TokensRepository tokensRepository) {
+    public PersonTransactionsController(PersonTransactionsService personTransactionsService, PeopleService peopleService, PersonValidator personValidator, PersonTransactionValidator personTransactionValidator, TokensRepository tokensRepository, Validator validator) {
         this.personTransactionsService = personTransactionsService;
         this.peopleService = peopleService;
         this.personTransactionValidator = personTransactionValidator;
