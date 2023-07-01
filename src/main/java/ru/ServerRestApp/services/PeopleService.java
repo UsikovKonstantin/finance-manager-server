@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.Person;
+import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.TeamsRepository;
@@ -86,6 +87,19 @@ public class PeopleService {
     @Transactional
     public void delete(int id) {
         peopleRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void kick(int id) {
+
+        Team team = new Team();
+        team.setName("Новая группа");
+
+        teamsRepository.save(team);
+
+        Person person = peopleRepository.findById(id).get();
+        person.setTeam(team);
+        peopleRepository.save(person);
     }
 
 }

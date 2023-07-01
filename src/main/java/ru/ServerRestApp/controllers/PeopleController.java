@@ -75,6 +75,31 @@ public class PeopleController {
         return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
+    // Выгнать человека из группы
+    @PostMapping("/kick")
+    public ResponseEntity<Person> kick(@RequestHeader("Authorization") String token,
+                                       @RequestBody Person personToKick) {
+
+        Person person = personUtil.getPersonByToken(token);
+        if (!"ROLE_LEADER".equals(person.getRole()))
+            throw new DataException("Person who kicks should have the ROLE_LEADER!");
+
+        Optional<Person> toKick = peopleService.findById(personToKick.getId());
+        if (toKick.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        if (!"ROLE_USER".equals(toKick.get().getRole()))
+            throw new DataException("Person being kicked should have the ROLE_USER!");
+
+        if (person.getTeam().getId() != toKick.get().getTeam().getId())
+            throw new DataException("People must be in the same team!");
+
+        peopleService.kick(toKick.get().getId());
+
+        return new ResponseEntity<>(peopleService.findById(toKick.get().getId()).get(), HttpStatus.OK);
+    }
+
+
     /*
     // Получить человека по email
     @GetMapping("/email")
