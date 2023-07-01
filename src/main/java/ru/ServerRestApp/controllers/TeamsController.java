@@ -6,15 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import ru.ServerRestApp.models.CategoryTransaction;
+import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.util.PersonUtil;
 
-import java.util.List;
 import java.util.Optional;
 
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
@@ -25,24 +24,28 @@ import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 public class TeamsController {
 
     private final TeamsService teamsService;
+    private final PersonUtil personUtil;
     @Autowired
-    public TeamsController(TeamsService teamsService) {
+    public TeamsController(TeamsService teamsService, PersonUtil personUtil) {
         this.teamsService = teamsService;
+        this.personUtil = personUtil;
     }
 
-
+    /*
+    // Получить все группы
     @GetMapping()
     public ResponseEntity<List<Team>> getAllTeams() {
         List<Team> teams = teamsService.findAll();
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
+     */
 
-    @GetMapping("/byId")
-    public ResponseEntity<Team> getTeam(@RequestBody Team bodyTeam) {
-        Optional<Team> team = teamsService.findById(bodyTeam.getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(team.get(), HttpStatus.OK);
+    // Получить мою группу
+    @GetMapping("/my")
+    public ResponseEntity<Team> getTeam(@RequestHeader("Authorization") String token) {
+
+        Person person = personUtil.getPersonByToken(token);
+        return new ResponseEntity<>(person.getTeam(), HttpStatus.OK);
     }
 
     /*
