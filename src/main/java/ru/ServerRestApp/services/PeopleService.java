@@ -98,6 +98,7 @@ public class PeopleService {
         teamsRepository.save(team);
 
         Person person = peopleRepository.findById(id).get();
+        person.setRole("ROLE_LEADER");
         person.setTeam(team);
         peopleRepository.save(person);
     }
