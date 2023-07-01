@@ -64,14 +64,14 @@ public class TeamsController {
 
 
     @PostMapping("/update")
-    public ResponseEntity<Team> updateTeam(@RequestBody @Valid Team team, BindingResult bindingResult) {
+    public ResponseEntity<Team> updateTeam(@RequestHeader("Authorization") String token,
+                                           @RequestBody @Valid Team team, BindingResult bindingResult) {
+
+        Person person = personUtil.getPersonByToken(token);
+        team.setId(person.getTeam().getId());
 
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
-
-        Optional<Team> foundTeam = teamsService.findById(team.getId());
-        if (foundTeam.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
 
         teamsService.update(team);
 
