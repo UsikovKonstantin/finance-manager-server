@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.InvitationsService;
@@ -15,6 +14,7 @@ import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.util.PersonUtil;
 import ru.ServerRestApp.validators.InvitationValidator;
 
 import java.util.List;
@@ -31,41 +31,47 @@ public class InvitationsController {
     private final PeopleService peopleService;
     private final InvitationValidator invitationValidator;
     private final TokensRepository tokensRepository;
+    private final PersonUtil personUtil;
     @Autowired
-    public InvitationsController(InvitationsService invitationsService, PeopleService peopleService, TeamsService teamsService, TeamsService teamsService1, InvitationValidator invitationValidator, TokensRepository tokensRepository) {
+    public InvitationsController(InvitationsService invitationsService, PeopleService peopleService, TeamsService teamsService, TeamsService teamsService1, InvitationValidator invitationValidator, TokensRepository tokensRepository, PersonUtil personUtil) {
         this.invitationsService = invitationsService;
         this.peopleService = peopleService;
         this.invitationValidator = invitationValidator;
         this.tokensRepository = tokensRepository;
+        this.personUtil = personUtil;
     }
 
-
+    /*
+    // Получить все приглашения
     @GetMapping()
     public ResponseEntity<List<Invitation>> getAllInvitations() {
         List<Invitation> invitations = invitationsService.findAll();
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
+     */
 
-    @GetMapping("/personFrom/byId")
-    public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findById(bodyPerson.getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
+    // Получить приглашения отправленные мной
+    @GetMapping("/fromMe")
+    public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@RequestHeader("Authorization") String token) {
 
-        List<Invitation> invitations = invitationsService.findByPersonFromId(bodyPerson.getId());
+        Person person = personUtil.getPersonByToken(token);
+
+        List<Invitation> invitations = invitationsService.findByPersonFromId(person.getId());
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
-    @GetMapping("/personTo/byId")
-    public ResponseEntity<List<Invitation>> getInvitationsByPersonToId(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findById(bodyPerson.getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
+    // Получить приглашения, отправленные мне
+    @GetMapping("/toMe")
+    public ResponseEntity<List<Invitation>> getInvitationsByPersonToId(@RequestHeader("Authorization") String token) {
 
-        List<Invitation> invitations = invitationsService.findByPersonToId(bodyPerson.getId());
+        Person person = personUtil.getPersonByToken(token);
+
+        List<Invitation> invitations = invitationsService.findByPersonToId(person.getId());
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
+    /*
+    // Найти приглашение по id
     @GetMapping("/byId")
     public ResponseEntity<Invitation> getInvitation(@RequestBody Invitation bodyInvitation) {
         Optional<Invitation> invitation = invitationsService.findById(bodyInvitation.getId());
@@ -73,6 +79,7 @@ public class InvitationsController {
             throw new NotFoundException("Invitation with this id wasn't found!");
         return new ResponseEntity<>(invitation.get(), HttpStatus.OK);
     }
+     */
 
 
     @PostMapping("/add")
