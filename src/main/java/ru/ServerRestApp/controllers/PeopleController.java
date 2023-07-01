@@ -1,6 +1,5 @@
 package ru.ServerRestApp.controllers;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,7 @@ import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.util.PersonUtil;
 import ru.ServerRestApp.validators.PersonValidator;
 
 import java.util.List;
@@ -36,40 +36,47 @@ public class PeopleController {
     private final PersonValidator personValidator;
     private final TokensRepository tokensRepository;
     private final Validator validator;
+    private final PersonUtil personUtil;
     @Autowired
-    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository, TokensRepository tokensRepository1, Validator validator) {
+    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository, TokensRepository tokensRepository1, Validator validator, PersonUtil personUtil) {
         this.peopleService = peopleService;
         this.teamsService = teamsService;
         this.passwordEncoder = passwordEncoder;
         this.personValidator = personValidator;
         this.tokensRepository = tokensRepository1;
         this.validator = validator;
+        this.personUtil = personUtil;
     }
 
+    /*
+    // Получить список всех людей
     @GetMapping()
     public ResponseEntity<List<Person>> getAllPeople() {
         List<Person> people = peopleService.findAll();
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
+     */
 
-    @GetMapping("/team/byId")
-    public ResponseEntity<List<Person>> getPeopleByTeamId(@RequestBody Person bodyPerson) {
-        Optional<Team> team = teamsService.findById(bodyPerson.getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
+    // Получить список людей в группе
+    @GetMapping("/team")
+    public ResponseEntity<List<Person>> getPeopleByTeamId(@RequestHeader("Authorization") String token) {
 
-        List<Person> people = peopleService.findByTeamId(bodyPerson.getId());
+        Person person = personUtil.getPersonByToken(token);
+
+        List<Person> people = peopleService.findByTeamId(person.getTeam().getId());
         return new ResponseEntity<>(people, HttpStatus.OK);
     }
 
-    @GetMapping("/byId")
-    public ResponseEntity<Person> getPerson(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findById(bodyPerson.getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(person.get(), HttpStatus.OK);
+    // Получить себя
+    @GetMapping("/me")
+    public ResponseEntity<Person> getPerson(@RequestHeader("Authorization") String token) {
+
+        Person person = personUtil.getPersonByToken(token);
+        return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
+    /*
+    // Получить человека по email
     @GetMapping("/email")
     public ResponseEntity<Person> getPersonByEmail(@RequestBody Person bodyPerson) {
         Optional<Person> person = peopleService.findByEmail(bodyPerson.getEmail());
@@ -77,6 +84,7 @@ public class PeopleController {
             throw new NotFoundException("Person with this email wasn't found!");
         return new ResponseEntity<>(person.get(), HttpStatus.OK);
     }
+     */
 
 
     @PostMapping("/update")
@@ -93,15 +101,9 @@ public class PeopleController {
 
         validator.validate(person, bindingResult);
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person found_person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        person.setId(found_person.get().getId());
+        person.setId(found_person.getId());
         personValidator.validate(person, bindingResult);
 
         if (bindingResult.hasErrors())
@@ -110,7 +112,7 @@ public class PeopleController {
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         peopleService.update(person, changePassword);
 
-        return new ResponseEntity<>(peopleService.findById(found_person.get().getId()).get(), HttpStatus.OK);
+        return new ResponseEntity<>(peopleService.findById(found_person.getId()).get(), HttpStatus.OK);
     }
 
 
