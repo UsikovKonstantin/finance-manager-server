@@ -103,4 +103,16 @@ public class PeopleService {
         peopleRepository.save(person);
     }
 
+    @Transactional
+    public void makeLeader(int idFrom, int idTo) {
+
+        Person from = peopleRepository.findById(idFrom).get();
+        from.setRole("ROLE_USER");
+        peopleRepository.save(from);
+
+        Person to = peopleRepository.findById(idTo).get();
+        to.setRole("ROLE_LEADER");
+        peopleRepository.save(to);
+    }
+
 }

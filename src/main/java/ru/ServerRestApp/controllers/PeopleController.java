@@ -99,6 +99,30 @@ public class PeopleController {
         return new ResponseEntity<>(peopleService.findById(toKick.get().getId()).get(), HttpStatus.OK);
     }
 
+    // Сделать человека лидером
+    @PostMapping("/giveLeader")
+    public ResponseEntity<Person> giveLeader(@RequestHeader("Authorization") String token,
+                                       @RequestBody Person personToBeLeader) {
+
+        Person person = personUtil.getPersonByToken(token);
+        if (!"ROLE_LEADER".equals(person.getRole()))
+            throw new DataException("Person who gives a role should have the ROLE_LEADER!");
+
+        Optional<Person> toLeader = peopleService.findById(personToBeLeader.getId());
+        if (toLeader.isEmpty())
+            throw new NotFoundException("Person with this id wasn't found!");
+
+        if (!"ROLE_USER".equals(toLeader.get().getRole()))
+            throw new DataException("Person who gets a role should have the ROLE_USER!");
+
+        if (person.getTeam().getId() != toLeader.get().getTeam().getId())
+            throw new DataException("People must be in the same team!");
+
+        peopleService.makeLeader(person.getId(), toLeader.get().getId());
+
+        return new ResponseEntity<>(peopleService.findById(toLeader.get().getId()).get(), HttpStatus.OK);
+    }
+
 
     /*
     // Получить человека по email
