@@ -87,21 +87,13 @@ public class InvitationsController {
                                                     @RequestBody @Valid Invitation invitation,
                                                     BindingResult bindingResult) {
 
+        Person person = personUtil.getPersonByToken(token);
+        invitation.setPersonFrom(person);
+
         invitationValidator.validate(invitation, bindingResult);
 
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
-
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
-
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        if (found_person.get().getId() != invitation.getPersonFrom().getId())
-            throw new DataException("Attempt to change another person's data");
 
         invitation.setId(0);
         invitationsService.save(invitation);
