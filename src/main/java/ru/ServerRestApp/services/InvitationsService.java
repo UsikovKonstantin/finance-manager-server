@@ -89,16 +89,16 @@ public class InvitationsService {
         List<Invitation> invitationsToDelete = invitationsRepository.findByPersonToIdAndPersonFromTeamId(invitation.getPersonTo().getId(), invitation.getPersonFrom().getTeam().getId());
         List<Invitation> invitationsToDelete2 = invitationsRepository.findByPersonFromId(invitation.getPersonTo().getId());
 
+        // Список людей, оставшихся в группе, которую покинул человек
+        List<Person> peopleLeft = peopleRepository.findByTeamId(personToTeamId);
+
         // Перевод пользователя в другую группу
-        if (invitation.getPersonTo().getRole().equals("ROLE_LEADER"))
+        if (invitation.getPersonTo().getRole().equals("ROLE_LEADER") && peopleLeft.size() != 1)
             throw new DataException("Person accepting the invitation should not be a leader!");
         invitation.getPersonTo().setTeam(invitation.getPersonFrom().getTeam());
         invitation.getPersonTo().setRole("ROLE_USER");
 
-        // Список людей, оставшихся в группе, которую покинул человек
-        List<Person> peopleLeft = peopleRepository.findByTeamId(personToTeamId);
-
-        if (peopleLeft.size() == 0)
+        if (peopleLeft.size() == 1)
             teamsRepository.deleteById(personToTeamId);
 
         for (Invitation invite : invitationsToDelete)
