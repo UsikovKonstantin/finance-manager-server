@@ -100,7 +100,7 @@ public class PeopleController {
     }
 
 
-    // Выгнать человека из группы
+    // Выйти из группы
     @PostMapping("/leave")
     public ResponseEntity<Person> kick(@RequestHeader("Authorization") String token) {
 
