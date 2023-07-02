@@ -101,6 +101,8 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
 
+    /*
+    // Обновление приглашения
     @PostMapping("/update")
     public ResponseEntity<Invitation> updateInvitation(@RequestHeader("Authorization") String token,
                                                        @RequestBody @Valid Invitation invitation,
@@ -114,21 +116,16 @@ public class InvitationsController {
         if (bindingResult.hasErrors())
             returnDataErrorsToClient(bindingResult);
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person found_person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        if (found_person.get().getId() != invitation.getPersonFrom().getId())
+        if (found_person.getId() != invitation.getPersonFrom().getId())
             throw new DataException("Attempt to change another person's data");
 
         invitationsService.update(invitation);
 
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
+     */
 
     @PostMapping("/delete")
     public ResponseEntity<Invitation> deleteInvitation(@RequestHeader("Authorization") String token,
@@ -138,15 +135,10 @@ public class InvitationsController {
         if (foundInvitation.isEmpty())
             throw new NotFoundException("Invitation with this id wasn't found!");
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person found_person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        if (found_person.get().getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonFrom().getId())
+        if (found_person.getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonFrom().getId() &&
+                found_person.getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonTo().getId())
             throw new DataException("Attempt to change another person's data");
 
         invitationsService.delete(bodyInvitation.getId());
@@ -162,15 +154,9 @@ public class InvitationsController {
         if (foundInvitation.isEmpty())
             throw new NotFoundException("Invitation with this id wasn't found!");
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person found_person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        if (found_person.get().getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonFrom().getId())
+        if (found_person.getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonTo().getId())
             throw new DataException("Attempt to change another person's data");
 
         invitationsService.accept(bodyInvitation.getId());

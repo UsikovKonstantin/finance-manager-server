@@ -9,6 +9,7 @@ import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.InvitationsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.TeamsRepository;
+import ru.ServerRestApp.util.DataException;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,19 +90,16 @@ public class InvitationsService {
         List<Invitation> invitationsToDelete2 = invitationsRepository.findByPersonFromId(invitation.getPersonTo().getId());
 
         // Перевод пользователя в другую группу
+        if (invitation.getPersonTo().getRole().equals("ROLE_LEADER"))
+            throw new DataException("Person accepting the invitation should not be a leader!");
         invitation.getPersonTo().setTeam(invitation.getPersonFrom().getTeam());
         invitation.getPersonTo().setRole("ROLE_USER");
 
         // Список людей, оставшихся в группе, которую покинул человек
         List<Person> peopleLeft = peopleRepository.findByTeamId(personToTeamId);
 
-        // Список админов в этой группе
-        List<Person> peopleLeftLeaders = peopleRepository.findByTeamIdAndRole(personToTeamId, "ROLE_LEADER");
-
         if (peopleLeft.size() == 0)
             teamsRepository.deleteById(personToTeamId);
-        else if (peopleLeftLeaders.size() == 0)
-            peopleLeft.get(0).setRole("ROLE_LEADER");
 
         for (Invitation invite : invitationsToDelete)
             invitationsRepository.deleteById(invite.getId());
