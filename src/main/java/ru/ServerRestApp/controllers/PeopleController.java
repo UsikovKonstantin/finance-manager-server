@@ -99,6 +99,22 @@ public class PeopleController {
         return new ResponseEntity<>(peopleService.findById(toKick.get().getId()).get(), HttpStatus.OK);
     }
 
+
+    // Выгнать человека из группы
+    @PostMapping("/leave")
+    public ResponseEntity<Person> kick(@RequestHeader("Authorization") String token) {
+
+        Person person = personUtil.getPersonByToken(token);
+        if ("ROLE_LEADER".equals(person.getRole()))
+            throw new DataException("Leader cannot leave the team!");
+
+        peopleService.kick(person.getId());
+
+        return new ResponseEntity<>(peopleService.findById(person.getId()).get(), HttpStatus.OK);
+    }
+
+
+
     // Сделать человека лидером
     @PostMapping("/giveLeader")
     public ResponseEntity<Person> giveLeader(@RequestHeader("Authorization") String token,
