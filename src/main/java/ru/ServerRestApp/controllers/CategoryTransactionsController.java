@@ -6,16 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.JWT.repository.TokensRepository;
 import ru.ServerRestApp.models.*;
-import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.services.CategoryTransactionsService;
-import ru.ServerRestApp.services.PeopleService;
-import ru.ServerRestApp.services.TeamsService;
-import ru.ServerRestApp.util.CategoryTransactionGroup;
-import ru.ServerRestApp.util.ErrorResponse;
-import ru.ServerRestApp.util.DataException;
-import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.util.*;
 import ru.ServerRestApp.validators.CategoryTransactionValidator;
 
 import java.util.Calendar;
@@ -31,71 +24,47 @@ import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 public class CategoryTransactionsController {
 
     private final CategoryTransactionsService categoryTransactionsService;
-    private final PeopleService peopleService;
-    private final CategoriesService categoriesService;
     private final CategoryTransactionValidator categoryTransactionValidator;
-    private final TokensRepository tokensRepository;
-    private final TeamsService teamsService;
+    private final PersonUtil personUtil;
     @Autowired
-    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService, CategoryTransactionValidator categoryTransactionValidator, TokensRepository tokensRepository, TeamsService teamsService) {
+    public CategoryTransactionsController(CategoryTransactionsService categoryTransactionsService, CategoryTransactionValidator categoryTransactionValidator, PersonUtil personUtil) {
         this.categoryTransactionsService = categoryTransactionsService;
-        this.peopleService = peopleService;
-        this.categoriesService = categoriesService;
         this.categoryTransactionValidator = categoryTransactionValidator;
-        this.tokensRepository = tokensRepository;
-        this.teamsService = teamsService;
+        this.personUtil = personUtil;
     }
 
-
+    /*
+    // Получить все транзакции
     @GetMapping()
     public ResponseEntity<List<CategoryTransaction>> getAllCategoryTransactions() {
         List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findAll();
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
+    */
 
 
+    // Получить транзакции пользователя за все время
     @GetMapping("/person")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonId(@RequestHeader("Authorization") String token) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(found_person.get().getId());
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonId(person.getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
+    // Получить транзакции команды за все время
     @GetMapping("/team")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByTeamId(@RequestHeader("Authorization") String token) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        Optional<Team> team = teamsService.findById(person.get().getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamId(person.get().getTeam().getId());
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamId(person.getTeam().getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
+    /*
+    // Получить все транзакции по определенной категории
     @GetMapping("/category/byId")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByCategoryId(@RequestBody Category bodyCategory) {
         Optional<Category> category = categoriesService.findById(bodyCategory.getId());
@@ -105,7 +74,10 @@ public class CategoryTransactionsController {
         List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByCategoryId(bodyCategory.getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
+    */
 
+    /*
+    // Получить транзакцию по id
     @GetMapping("/byId")
     public ResponseEntity<CategoryTransaction> getCategoryTransaction(@RequestBody CategoryTransaction bodyCategoryTransaction) {
         Optional<CategoryTransaction> categoryTransaction = categoryTransactionsService.findById(bodyCategoryTransaction.getId());
@@ -113,100 +85,61 @@ public class CategoryTransactionsController {
             throw new NotFoundException("CategoryTransaction with this id wasn't found!");
         return new ResponseEntity<>(categoryTransaction.get(), HttpStatus.OK);
     }
+    */
 
+    // Получить доходы человека за все время, сгруппированные по категории
     @GetMapping("/person/income")
     public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForPerson(@RequestHeader("Authorization") String token) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPerson(found_person.get().getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPerson(person.getId()), HttpStatus.OK);
     }
 
+    // Получить расходы человека за все время, сгруппированные по категории
     @GetMapping("/person/expenses")
     public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForPerson(@RequestHeader("Authorization") String token) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPerson(found_person.get().getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPerson(person.getId()), HttpStatus.OK);
     }
 
+    // Получить доходы группы за все время, сгруппированные по категории
     @GetMapping("/team/income")
     public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForGroup(@RequestHeader("Authorization") String token) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroup(found_person.get().getTeam().getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroup(person.getTeam().getId()), HttpStatus.OK);
     }
 
+    // Получить расходы группы за все время, сгруппированные по категории
     @GetMapping("/team/expenses")
     public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForGroup(@RequestHeader("Authorization") String token) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroup(found_person.get().getTeam().getId()), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroup(person.getTeam().getId()), HttpStatus.OK);
     }
 
 
 
+    // Получить транзакции пользователя за месяц
     @GetMapping("/person/month")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByPersonIdForMonth(@RequestHeader("Authorization") String token,
                                                                                                @RequestParam("timestamp") long timestamp) {
-
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp));
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonIdForMonth(found_person.get().getId(),calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonIdForMonth(
+                person.getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
+    // Получить транзакции группы за месяц
     @GetMapping("/team/month")
     public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByTeamId(@RequestHeader("Authorization") String token,
                                                                                      @RequestParam("timestamp") long timestamp) {
@@ -214,26 +147,14 @@ public class CategoryTransactionsController {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp));
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-
-        Optional<Team> team = teamsService.findById(person.get().getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamIdForMonth(person.get().getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
+        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamIdForMonth(
+                person.getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR));
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
 
+    // Получить доходы пользователя за месяц
     @GetMapping("/person/income/month")
     public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForPersonForMonth(@RequestHeader("Authorization") String token,
                                                                                                              @RequestParam("timestamp") long timestamp) {
@@ -241,20 +162,13 @@ public class CategoryTransactionsController {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp));
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPersonForMonth(found_person.get().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForPersonForMonth(
+                person.getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
     }
 
+    // Получить расходы пользователя за месяц
     @GetMapping("/person/expenses/month")
     public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForPersonForMonth(@RequestHeader("Authorization") String token,
                                                                                                              @RequestParam("timestamp") long timestamp) {
@@ -262,20 +176,13 @@ public class CategoryTransactionsController {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp));
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPersonForMonth(found_person.get().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForPersonForMonth(
+                person.getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
     }
 
+    // Получить доходы группы за месяц
     @GetMapping("/team/income/month")
     public ResponseEntity<List<CategoryTransactionGroup>> getPositiveTransactionsByCategoryForGroupForMonth(@RequestHeader("Authorization") String token,
                                                                                                             @RequestParam("timestamp") long timestamp) {
@@ -283,20 +190,13 @@ public class CategoryTransactionsController {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp));
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroupForMonth(found_person.get().getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getPositiveTransactionsByCategoryForGroupForMonth(
+                person.getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
     }
 
+    // Получить расходы группы за месяц
     @GetMapping("/team/expenses/month")
     public ResponseEntity<List<CategoryTransactionGroup>> getNegativeTransactionsByCategoryForGroupForMonth(@RequestHeader("Authorization") String token,
                                                                                                             @RequestParam("timestamp") long timestamp) {
@@ -304,75 +204,45 @@ public class CategoryTransactionsController {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp));
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Team> team = teamsService.findById(found_person.get().getTeam().getId());
-        if (team.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroupForMonth(found_person.get().getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroupForMonth(
+                person.getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
     }
 
 
 
+    // Получить n последних доходов пользователя
     @GetMapping("/person/income/last")
     public ResponseEntity<List<CategoryTransaction>> findNLastPositiveTransactionsForPerson(@RequestHeader("Authorization") String token,
                                                                                             @RequestParam("limit") int limit) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.findNLastPositiveTransactionsForPerson(found_person.get().getId(), limit), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.findNLastPositiveTransactionsForPerson(person.getId(), limit), HttpStatus.OK);
     }
 
+    // Получить n последних расходов пользователя
     @GetMapping("/person/expenses/last")
     public ResponseEntity<List<CategoryTransaction>> findNLastNegativeTransactionsForPerson(@RequestHeader("Authorization") String token,
                                                                                                      @RequestParam("limit") int limit) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        Optional<Person> person = peopleService.findById(found_person.get().getId());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransactionsService.findNLastNegativeTransactionsForPerson(found_person.get().getId(), limit), HttpStatus.OK);
+        return new ResponseEntity<>(categoryTransactionsService.findNLastNegativeTransactionsForPerson(person.getId(), limit), HttpStatus.OK);
     }
 
 
 
-
+    // Добавить транзакцию
     @PostMapping("/add")
     public ResponseEntity<CategoryTransaction> addCategoryTransaction(@RequestHeader("Authorization") String token,
                                                                       @RequestBody @Valid CategoryTransaction categoryTransaction,
                                                                       BindingResult bindingResult) {
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        categoryTransaction.setPerson(found_person.get());
+        categoryTransaction.setPerson(person);
 
         categoryTransactionValidator.validate(categoryTransaction, bindingResult);
 
@@ -385,6 +255,7 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
     }
 
+    // Обновить транзакцию
     @PostMapping("/update")
     public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@RequestHeader("Authorization") String token,
                                                                          @RequestBody @Valid CategoryTransaction categoryTransaction,
@@ -393,15 +264,9 @@ public class CategoryTransactionsController {
         if (categoryTransactionsService.findById(categoryTransaction.getId()).isEmpty())
             bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        categoryTransaction.setPerson(found_person.get());
+        categoryTransaction.setPerson(person);
 
         categoryTransactionValidator.validate(categoryTransaction, bindingResult);
 
@@ -413,7 +278,7 @@ public class CategoryTransactionsController {
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
     }
 
-
+    // Удалить транзакцию
     @PostMapping("/delete")
     public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@RequestHeader("Authorization") String token,
                                                                          @RequestBody CategoryTransaction bodyCategoryTransaction) {
@@ -422,15 +287,9 @@ public class CategoryTransactionsController {
         if (foundCategoryTransaction.isEmpty())
             throw new NotFoundException("CategoryTransaction with this id wasn't found!");
 
-        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token.substring(7));
-        if (found_tokens.isEmpty())
-            throw new NotFoundException("Token wasn't found!");
+        Person person = personUtil.getPersonByToken(token);
 
-        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
-        if (found_person.isEmpty())
-            throw new NotFoundException("Person wasn't found!");
-
-        if (found_person.get().getId() != categoryTransactionsService.findById(bodyCategoryTransaction.getId()).get().getPerson().getId())
+        if (person.getId() != foundCategoryTransaction.get().getPerson().getId())
             throw new DataException("Attempt to change another person's data");
 
         categoryTransactionsService.delete(bodyCategoryTransaction.getId());

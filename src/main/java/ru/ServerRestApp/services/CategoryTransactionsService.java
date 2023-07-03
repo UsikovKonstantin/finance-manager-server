@@ -3,18 +3,14 @@ package ru.ServerRestApp.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.CategoryTransaction;
-import ru.ServerRestApp.models.Invitation;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.repositories.CategoriesRepository;
 import ru.ServerRestApp.repositories.CategoryTransactionsRepository;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.util.CategoryTransactionGroup;
 import ru.ServerRestApp.util.DataException;
-import ru.ServerRestApp.util.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -102,12 +98,12 @@ public class CategoryTransactionsService {
 
 
     @Transactional(readOnly = true)
-    public List<CategoryTransaction> findByPersonIdForMonth(int id, int year, int month) {
+    public List<CategoryTransaction> findByPersonIdForMonth(int id, int month, int year) {
         return categoryTransactionsRepository.findByPersonIdForMonth(id, month, year);
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryTransaction> findByPersonTeamIdForMonth(int id, int year, int month) {
+    public List<CategoryTransaction> findByPersonTeamIdForMonth(int id, int month, int year) {
         return categoryTransactionsRepository.findByPersonTeamIdForMonth(id, month, year);
     }
 
