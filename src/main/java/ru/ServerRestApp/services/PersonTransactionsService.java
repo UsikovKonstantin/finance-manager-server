@@ -1,6 +1,8 @@
 package ru.ServerRestApp.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.models.CategoryTransaction;
@@ -36,6 +38,11 @@ public class PersonTransactionsService {
     }
 
     @Transactional(readOnly = true)
+    public List<PersonTransaction> findByPersonId(int id) {
+        return personTransactionsRepository.findByPersonId(id);
+    }
+
+    @Transactional(readOnly = true)
     public List<PersonTransaction> findByPersonFromId(int id) {
         return personTransactionsRepository.findByPersonFromId(id);
     }
@@ -44,6 +51,70 @@ public class PersonTransactionsService {
     public List<PersonTransaction> findByPersonToId(int id) {
         return personTransactionsRepository.findByPersonToId(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByTeamId(int id) {
+        return personTransactionsRepository.findByTeamId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByFromTeamId(int id) {
+        return personTransactionsRepository.findByFromTeamId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByToTeamId(int id) {
+        return personTransactionsRepository.findByToTeamId(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByPersonIdForMonth(int id, int month, int year) {
+        return personTransactionsRepository.findByPersonIdForMonth(id, month, year);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByFromPersonIdForMonth(int id, int month, int year) {
+        return personTransactionsRepository.findByPersonIdForMonth(id, month, year);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByToPersonIdForMonth(int id, int month, int year) {
+        return personTransactionsRepository.findByPersonIdForMonth(id, month, year);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByTeamIdForMonth(int id, int month, int year) {
+        return personTransactionsRepository.findByTeamIdForMonth(id, month, year);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByFromTeamIdForMonth(int id, int month, int year) {
+        return personTransactionsRepository.findByFromTeamIdForMonth(id, month, year);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findByToTeamIdForMonth(int id, int month, int year) {
+        return personTransactionsRepository.findByToTeamIdForMonth(id, month, year);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findNLastTransactionsPerson(int id, int n) {
+        Pageable pageable = PageRequest.of(0, n);
+        return personTransactionsRepository.findNLastTransactionsPerson(id, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findNLastTransactionsFromPerson(int id, int n) {
+        Pageable pageable = PageRequest.of(0, n);
+        return personTransactionsRepository.findNLastTransactionsFromPerson(id, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonTransaction> findNLastTransactionsToPerson(int id, int n) {
+        Pageable pageable = PageRequest.of(0, n);
+        return personTransactionsRepository.findNLastTransactionsToPerson(id, pageable);
+    }
+
 
     @Transactional
     public void save(PersonTransaction personTransaction) {
