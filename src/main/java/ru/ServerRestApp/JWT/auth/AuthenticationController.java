@@ -45,7 +45,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.forgotPassword(request, response));
     }
 
-    @GetMapping("/forgotPasswordConfirm")
+    @PostMapping("/forgotPasswordConfirm")
     public ResponseEntity<ForgotPasswordResponse> forgotPasswordConfirm(@RequestBody  ForgotPasswordRequest request, HttpServletResponse response){
         return ResponseEntity.ok(service.forgotPasswordConfirm(request, response));
     }
