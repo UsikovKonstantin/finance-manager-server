@@ -189,7 +189,7 @@ public class AuthenticationService {
         }
 
         emailSenderService.sendEmail(person.getEmail(), "Изменение пароля",
-                "Для смены пароля перейдите по ссылке: http://localhost:5173/authorization/reset/" + accessToken);
+                "Для смены пароля перейдите по ссылке: http://localhost:5173/authorization/reset?token=" + accessToken);
 
         return ForgotPasswordResponse.builder()
                 .token(accessToken)
