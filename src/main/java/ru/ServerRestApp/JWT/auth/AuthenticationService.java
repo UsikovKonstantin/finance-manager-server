@@ -105,7 +105,7 @@ public class AuthenticationService {
             Cookie cookie = new Cookie("refreshToken", refreshToken);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
-            cookie.setMaxAge(500000);
+            cookie.setMaxAge(1814400);
             response.addCookie(cookie);
 
             emailSenderService.sendEmail(person.getEmail(), "Подтверждение аккаунта",
@@ -168,7 +168,7 @@ public class AuthenticationService {
             Cookie cookie = new Cookie("refreshToken", refreshToken);
             cookie.setPath("/");
             cookie.setHttpOnly(true);
-            cookie.setMaxAge(500000);
+            cookie.setMaxAge(1814400);
             response.addCookie(cookie);
             return AuthenticationResponse.builder()
                     .token(accessToken)
@@ -278,7 +278,7 @@ public class AuthenticationService {
                     Cookie cookie = new Cookie("refreshToken", newRefreshToken);
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
-                    cookie.setMaxAge(500000);
+                    cookie.setMaxAge(1814400);
                     response.addCookie(cookie);
                     return AuthenticationResponse.builder()
                             .token(accessToken)
