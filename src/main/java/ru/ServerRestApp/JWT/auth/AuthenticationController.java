@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -25,8 +26,13 @@ public class AuthenticationController {
     }
 
     @GetMapping("/confirmRegistration")
-    public ResponseEntity<AuthenticationResponse> confirmRegistration(@RequestParam("token") String token, HttpServletResponse response){
-        return ResponseEntity.ok(service.confirmRegistration(token, response));
+    public RedirectView confirmRegistration(@RequestParam("token") String token, HttpServletResponse response){
+        service.confirmRegistration(token, response);
+
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl("http://localhost:5173");
+
+        return redirectView;
     }
 
     @PostMapping("/authenticate")
