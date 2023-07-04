@@ -31,7 +31,6 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository repository;
-
     private final TokensRepository tokensRepository;
     private final TeamsRepository teamsRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,8 +41,6 @@ public class AuthenticationService {
     private final PersonUtil personUtil;
     private final PeopleService peopleService;
 
-    public static boolean Auth = false;
-
     @Autowired
     public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, TeamsRepository teamsRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, EmailSenderService emailSenderService, PersonUtil personUtil, PeopleService peopleService) {
         this.repository = repository;
@@ -52,7 +49,6 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
-
         this.emailSenderService = emailSenderService;
         this.personUtil = personUtil;
         this.peopleService = peopleService;
@@ -97,7 +93,6 @@ public class AuthenticationService {
             cookie.setHttpOnly(true);
             cookie.setMaxAge(500000);
             response.addCookie(cookie);
-            Auth = true;
 
             emailSenderService.sendEmail(person.getEmail(), "Подтверждение аккаунта",
                 "Для подтверждения аккаунта перейдите по ссылке: http://localhost:8080/api/v1/auth/confirmRegistration?token=" + accessToken);
@@ -159,7 +154,6 @@ public class AuthenticationService {
             cookie.setHttpOnly(true);
             cookie.setMaxAge(500000);
             response.addCookie(cookie);
-            Auth = true;
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .person(person)
@@ -312,7 +306,6 @@ public class AuthenticationService {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
-        Auth = false;
         return null;
     }
 }
