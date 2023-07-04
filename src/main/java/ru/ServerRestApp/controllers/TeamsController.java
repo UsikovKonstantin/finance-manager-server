@@ -8,13 +8,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
+import ru.ServerRestApp.services.EmailSenderService;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 import ru.ServerRestApp.util.PersonUtil;
-
-import java.util.Optional;
 
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
@@ -25,10 +24,12 @@ public class TeamsController {
 
     private final TeamsService teamsService;
     private final PersonUtil personUtil;
+    private final EmailSenderService emailSenderService;
     @Autowired
-    public TeamsController(TeamsService teamsService, PersonUtil personUtil) {
+    public TeamsController(TeamsService teamsService, PersonUtil personUtil, EmailSenderService emailSenderService) {
         this.teamsService = teamsService;
         this.personUtil = personUtil;
+        this.emailSenderService = emailSenderService;
     }
 
     /*
@@ -46,6 +47,13 @@ public class TeamsController {
 
         Person person = personUtil.getPersonByToken(token);
         return new ResponseEntity<>(person.getTeam(), HttpStatus.OK);
+    }
+
+    @GetMapping("/send")
+    public void SendMessage(@RequestHeader("Authorization") String token) {
+
+        emailSenderService.sendEmail("usikov-kostya@mail.ru", "123", "Hello world");
+
     }
 
     /*
