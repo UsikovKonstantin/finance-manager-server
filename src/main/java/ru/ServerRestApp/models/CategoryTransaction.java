@@ -38,18 +38,18 @@ public class CategoryTransaction {
     public CategoryTransaction() {
     }
 
-    public CategoryTransaction(double amount, Date created_at, String description, Person person, Category category) {
+    public CategoryTransaction(double amount, Date createdAt, String description, Person person, Category category) {
         this.amount = amount;
-        this.createdAt = created_at;
+        this.createdAt = createdAt;
         this.description = description;
         this.person = person;
         this.category = category;
     }
 
-    public CategoryTransaction(int id, double amount, Date created_at, String description, Person person, Category category) {
+    public CategoryTransaction(int id, double amount, Date createdAt, String description, Person person, Category category) {
         this.id = id;
         this.amount = amount;
-        this.createdAt = created_at;
+        this.createdAt = createdAt;
         this.description = description;
         this.person = person;
         this.category = category;

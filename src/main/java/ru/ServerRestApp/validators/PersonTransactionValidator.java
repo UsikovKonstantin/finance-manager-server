@@ -4,15 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import ru.ServerRestApp.models.Invitation;
-import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.services.PeopleService;
 import ru.ServerRestApp.services.PersonTransactionsService;
-import ru.ServerRestApp.util.DataException;
-import ru.ServerRestApp.util.NotFoundException;
-
-import java.util.Optional;
 
 @Component
 public class PersonTransactionValidator implements Validator {
@@ -51,8 +45,8 @@ public class PersonTransactionValidator implements Validator {
         else
             to = true;
 
-        if (personTransaction.getCreated_at() == null)
-            errors.rejectValue("created_at", "", "Created_at must not be null!");
+        if (personTransaction.getCreatedAt() == null)
+            errors.rejectValue("createdAt", "", "Created_at must not be null!");
 
         if (personTransaction.getAmount() == 0)
             errors.rejectValue("amount", "", "Amount must not be 0!");

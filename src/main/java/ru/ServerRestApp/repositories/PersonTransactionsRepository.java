@@ -34,40 +34,40 @@ public interface PersonTransactionsRepository extends JpaRepository<PersonTransa
 
     @Query("SELECT pt FROM PersonTransaction pt " +
             "WHERE pt.personFrom.id = :personId OR pt.personTo.id = :personId " +
-            "AND YEAR(pt.created_at) = :year " +
-            "AND MONTH(pt.created_at) = :month")
+            "AND YEAR(pt.createdAt) = :year " +
+            "AND MONTH(pt.createdAt) = :month")
     List<PersonTransaction> findByPersonIdForMonth(int personId, int month, int year);
 
     @Query("SELECT pt FROM PersonTransaction pt " +
             "WHERE pt.personFrom.id = :personId " +
-            "AND YEAR(pt.created_at) = :year " +
-            "AND MONTH(pt.created_at) = :month")
+            "AND YEAR(pt.createdAt) = :year " +
+            "AND MONTH(pt.createdAt) = :month")
     List<PersonTransaction> findByFromPersonIdForMonth(int personId, int month, int year);
 
     @Query("SELECT pt FROM PersonTransaction pt " +
             "WHERE pt.personTo.id = :personId " +
-            "AND YEAR(pt.created_at) = :year " +
-            "AND MONTH(pt.created_at) = :month")
+            "AND YEAR(pt.createdAt) = :year " +
+            "AND MONTH(pt.createdAt) = :month")
     List<PersonTransaction> findByToPersonIdForMonth(int personId, int month, int year);
 
 
 
     @Query("SELECT pt FROM PersonTransaction pt " +
             "WHERE pt.personFrom.team.id = :teamId OR pt.personTo.team.id = :teamId " +
-            "AND YEAR(pt.created_at) = :year " +
-            "AND MONTH(pt.created_at) = :month")
+            "AND YEAR(pt.createdAt) = :year " +
+            "AND MONTH(pt.createdAt) = :month")
     List<PersonTransaction> findByTeamIdForMonth(int teamId, int month, int year);
 
     @Query("SELECT pt FROM PersonTransaction pt " +
             "WHERE pt.personFrom.team.id = :teamId " +
-            "AND YEAR(pt.created_at) = :year " +
-            "AND MONTH(pt.created_at) = :month")
+            "AND YEAR(pt.createdAt) = :year " +
+            "AND MONTH(pt.createdAt) = :month")
     List<PersonTransaction> findByFromTeamIdForMonth(int teamId, int month, int year);
 
     @Query("SELECT pt FROM PersonTransaction pt " +
             "WHERE pt.personTo.team.id = :teamId " +
-            "AND YEAR(pt.created_at) = :year " +
-            "AND MONTH(pt.created_at) = :month")
+            "AND YEAR(pt.createdAt) = :year " +
+            "AND MONTH(pt.createdAt) = :month")
     List<PersonTransaction> findByToTeamIdForMonth(int teamId, int month, int year);
 
 
@@ -76,19 +76,19 @@ public interface PersonTransactionsRepository extends JpaRepository<PersonTransa
     @Query("SELECT pt " +
             "FROM PersonTransaction pt " +
             "WHERE pt.personFrom.id = :personId OR pt.personTo.id = :personId " +
-            "ORDER BY pt.created_at DESC")
+            "ORDER BY pt.createdAt DESC")
     List<PersonTransaction> findNLastTransactionsPerson(@Param("personId") int personId, Pageable pageable);
 
     @Query("SELECT pt " +
             "FROM PersonTransaction pt " +
             "WHERE pt.personFrom.id = :personId " +
-            "ORDER BY pt.created_at DESC")
+            "ORDER BY pt.createdAt DESC")
     List<PersonTransaction> findNLastTransactionsFromPerson(@Param("personId") int personId, Pageable pageable);
 
     @Query("SELECT pt " +
             "FROM PersonTransaction pt " +
             "WHERE pt.personFrom.id = :personId " +
-            "ORDER BY pt.created_at DESC")
+            "ORDER BY pt.createdAt DESC")
     List<PersonTransaction> findNLastTransactionsToPerson(@Param("personId") int personId, Pageable pageable);
 
 }

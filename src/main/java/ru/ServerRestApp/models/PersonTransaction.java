@@ -1,7 +1,6 @@
 package ru.ServerRestApp.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
@@ -21,7 +20,7 @@ public class PersonTransaction {
     private double amount;
 
     @Column(name = "created_at")
-    private Date created_at;
+    private Date createdAt;
 
     @Size(max = 50, message = "Описание транзакции должно быть до 50 символов длиной")
     @Column(name = "description")
@@ -42,7 +41,7 @@ public class PersonTransaction {
 
     public PersonTransaction(double amount, Date created_at, String description, Person person_from, Person person_to) {
         this.amount = amount;
-        this.created_at = created_at;
+        this.createdAt = created_at;
         this.description = description;
         this.personFrom = person_from;
         this.personTo = person_to;
@@ -51,7 +50,7 @@ public class PersonTransaction {
     public PersonTransaction(int id, double amount, Date created_at, String description, Person person_from, Person person_to) {
         this.id = id;
         this.amount = amount;
-        this.created_at = created_at;
+        this.createdAt = created_at;
         this.description = description;
         this.personFrom = person_from;
         this.personTo = person_to;
@@ -74,12 +73,12 @@ public class PersonTransaction {
         this.amount = amount;
     }
 
-    public Date getCreated_at() {
-        return created_at;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(Date created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getDescription() {
@@ -111,7 +110,7 @@ public class PersonTransaction {
         return "PersonTransaction{" +
                 "id=" + id +
                 ", amount=" + amount +
-                ", created_at=" + created_at +
+                ", created_at=" + createdAt +
                 ", description='" + description + '\'' +
                 ", personFrom=" + personFrom +
                 ", personTo=" + personTo +
