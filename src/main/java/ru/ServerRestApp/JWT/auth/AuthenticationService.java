@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,10 @@ import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.repositories.TeamsRepository;
+import ru.ServerRestApp.services.EmailSenderService;
+import ru.ServerRestApp.services.PeopleService;
+import ru.ServerRestApp.util.NotFoundException;
+import ru.ServerRestApp.util.PersonUtil;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,11 +37,14 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private String refreshToken;
+    private final EmailSenderService emailSenderService;
+    private final PersonUtil personUtil;
+    private final PeopleService peopleService;
 
     public static boolean Auth = false;
 
     @Autowired
-    public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, TeamsRepository teamsRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, TeamsRepository teamsRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, EmailSenderService emailSenderService, PersonUtil personUtil, PeopleService peopleService) {
         this.repository = repository;
         this.tokensRepository = tokensRepository;
         this.teamsRepository = teamsRepository;
@@ -44,6 +52,9 @@ public class AuthenticationService {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
 
+        this.emailSenderService = emailSenderService;
+        this.personUtil = personUtil;
+        this.peopleService = peopleService;
     }
 
     public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
@@ -128,6 +139,76 @@ public class AuthenticationService {
         catch (ResponseStatusException e) { return AuthenticationResponse.builder().error("Неправильно введён логин или пароль").build(); }
     }
 
+    public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request, HttpServletResponse response) {
+
+        Optional<Person> found_person = repository.findByEmail(request.getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Такого пользователя не существует");
+        Person person = found_person.get();
+
+        final String accessToken = jwtService.generateToken(person);
+        refreshToken  = jwtService.generateRefreshToken(person);
+
+        Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
+        if (token.isPresent()){
+            token.get().setAccessToken(accessToken);
+            token.get().setRefreshToken(refreshToken);
+            tokensRepository.save(token.get());
+        }
+        else {
+            var tokens = Tokens.builder()
+                    .email(person.getEmail())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+            tokensRepository.save(tokens);
+        }
+
+        emailSenderService.sendEmail(person.getEmail(), "Изменение пароля",
+                "Для смены пароля перейдите по ссылке: http://localhost:5173/authorization/reset/" + accessToken);
+
+        return ForgotPasswordResponse.builder()
+                .token(accessToken)
+                .person(person)
+                .build();
+    }
+
+    public ForgotPasswordResponse forgotPasswordConfirm(ForgotPasswordRequest request, HttpServletResponse response) {
+
+        Person person = personUtil.getPersonByTokenNew(request.getToken());
+
+        /*
+        final String accessToken = jwtService.generateToken(person);
+        refreshToken  = jwtService.generateRefreshToken(person);
+
+        Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
+        if (token.isPresent()){
+            token.get().setAccessToken(accessToken);
+            token.get().setRefreshToken(refreshToken);
+            tokensRepository.save(token.get());
+        }
+        else {
+            var tokens = Tokens.builder()
+                    .email(person.getEmail())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+            tokensRepository.save(tokens);
+        }
+
+         */
+
+        person.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        peopleService.save(person);
+
+        return ForgotPasswordResponse.builder()
+                .token(request.getToken())
+                .person(person)
+                .build();
+    }
+
+
     /*public AuthenticationResponse getAccessToken(String refreshToken) {
         try {
             if (JwtService.validateRefreshToken(refreshToken)) {
@@ -204,4 +285,6 @@ public class AuthenticationService {
         Auth = false;
         return null;
     }
+
+
 }

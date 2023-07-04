@@ -31,4 +31,17 @@ public class PersonUtil {
 
         return found_person.get();
     }
+
+    public Person getPersonByTokenNew(String token) {
+
+        Optional<Tokens> found_tokens = tokensRepository.findByAccessToken(token);
+        if (found_tokens.isEmpty())
+            throw new NotFoundException("Token wasn't found!");
+
+        Optional<Person> found_person = peopleService.findByEmail(found_tokens.get().getEmail());
+        if (found_person.isEmpty())
+            throw new NotFoundException("Person wasn't found!");
+
+        return found_person.get();
+    }
 }

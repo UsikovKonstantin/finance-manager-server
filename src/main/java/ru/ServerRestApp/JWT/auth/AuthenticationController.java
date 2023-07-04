@@ -29,6 +29,16 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.authenticate(request, response));
     }
 
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody  ForgotPasswordRequest request, HttpServletResponse response){
+        return ResponseEntity.ok(service.forgotPassword(request, response));
+    }
+
+    @PostMapping("/forgotPasswordConfirm")
+    public ResponseEntity<ForgotPasswordResponse> forgotPasswordConfirm(@RequestBody  ForgotPasswordRequest request, HttpServletResponse response){
+        return ResponseEntity.ok(service.forgotPasswordConfirm(request, response));
+    }
+
     /*@PostMapping("/token")
     public ResponseEntity<AuthenticationResponse> getNewAccessToken(@RequestBody  RefreshJwtRequest  request){
         return ResponseEntity.ok(service.getAccessToken(request.getRefreshToken()));
