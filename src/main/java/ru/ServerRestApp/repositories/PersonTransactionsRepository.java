@@ -4,8 +4,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.ServerRestApp.models.CategoryTransaction;
-import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.PersonTransaction;
 
 import java.util.List;

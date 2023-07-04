@@ -2,7 +2,6 @@ package ru.ServerRestApp.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.ServerRestApp.models.Invitation;
-import ru.ServerRestApp.models.Person;
 
 import java.util.List;
 import java.util.Optional;

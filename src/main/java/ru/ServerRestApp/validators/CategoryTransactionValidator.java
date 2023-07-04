@@ -6,19 +6,16 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.ServerRestApp.models.CategoryTransaction;
 import ru.ServerRestApp.services.CategoriesService;
-import ru.ServerRestApp.services.CategoryTransactionsService;
 import ru.ServerRestApp.services.PeopleService;
 
 @Component
 public class CategoryTransactionValidator implements Validator {
 
-    private final CategoryTransactionsService categoryTransactionsService;
     private final PeopleService peopleService;
     private final CategoriesService categoriesService;
 
     @Autowired
-    public CategoryTransactionValidator(CategoryTransactionsService categoryTransactionsService, PeopleService peopleService, CategoriesService categoriesService) {
-        this.categoryTransactionsService = categoryTransactionsService;
+    public CategoryTransactionValidator(PeopleService peopleService, CategoriesService categoriesService) {
         this.peopleService = peopleService;
         this.categoriesService = categoriesService;
     }

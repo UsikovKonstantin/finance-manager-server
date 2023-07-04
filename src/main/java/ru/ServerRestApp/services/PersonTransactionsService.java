@@ -5,8 +5,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ServerRestApp.models.CategoryTransaction;
-import ru.ServerRestApp.models.Invitation;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.PersonTransactionsRepository;
@@ -74,12 +72,12 @@ public class PersonTransactionsService {
 
     @Transactional(readOnly = true)
     public List<PersonTransaction> findByFromPersonIdForMonth(int id, int month, int year) {
-        return personTransactionsRepository.findByPersonIdForMonth(id, month, year);
+        return personTransactionsRepository.findByFromPersonIdForMonth(id, month, year);
     }
 
     @Transactional(readOnly = true)
     public List<PersonTransaction> findByToPersonIdForMonth(int id, int month, int year) {
-        return personTransactionsRepository.findByPersonIdForMonth(id, month, year);
+        return personTransactionsRepository.findByToPersonIdForMonth(id, month, year);
     }
 
     @Transactional(readOnly = true)

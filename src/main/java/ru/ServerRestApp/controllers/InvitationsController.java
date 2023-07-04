@@ -6,11 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.repositories.TokensRepository;
 import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.InvitationsService;
-import ru.ServerRestApp.services.PeopleService;
-import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
@@ -28,29 +25,17 @@ import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 public class InvitationsController {
 
     private final InvitationsService invitationsService;
-    private final PeopleService peopleService;
     private final InvitationValidator invitationValidator;
-    private final TokensRepository tokensRepository;
     private final PersonUtil personUtil;
     @Autowired
-    public InvitationsController(InvitationsService invitationsService, PeopleService peopleService, TeamsService teamsService, TeamsService teamsService1, InvitationValidator invitationValidator, TokensRepository tokensRepository, PersonUtil personUtil) {
+    public InvitationsController(InvitationsService invitationsService, InvitationValidator invitationValidator, PersonUtil personUtil) {
         this.invitationsService = invitationsService;
-        this.peopleService = peopleService;
         this.invitationValidator = invitationValidator;
-        this.tokensRepository = tokensRepository;
         this.personUtil = personUtil;
     }
 
-    /*
-    // Получить все приглашения
-    @GetMapping()
-    public ResponseEntity<List<Invitation>> getAllInvitations() {
-        List<Invitation> invitations = invitationsService.findAll();
-        return new ResponseEntity<>(invitations, HttpStatus.OK);
-    }
-     */
 
-    // Получить приглашения отправленные мной
+    // Получить приглашения, отправленные мной
     @GetMapping("/fromMe")
     public ResponseEntity<List<Invitation>> getInvitationsByPersonFromId(@RequestHeader("Authorization") String token) {
 
@@ -70,18 +55,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitations, HttpStatus.OK);
     }
 
-    /*
-    // Найти приглашение по id
-    @GetMapping("/byId")
-    public ResponseEntity<Invitation> getInvitation(@RequestBody Invitation bodyInvitation) {
-        Optional<Invitation> invitation = invitationsService.findById(bodyInvitation.getId());
-        if (invitation.isEmpty())
-            throw new NotFoundException("Invitation with this id wasn't found!");
-        return new ResponseEntity<>(invitation.get(), HttpStatus.OK);
-    }
-     */
-
-
+    // Добавить приглашение
     @PostMapping("/add")
     public ResponseEntity<Invitation> addInvitation(@RequestHeader("Authorization") String token,
                                                     @RequestBody @Valid Invitation invitation,
@@ -101,32 +75,7 @@ public class InvitationsController {
         return new ResponseEntity<>(invitation, HttpStatus.OK);
     }
 
-    /*
-    // Обновление приглашения
-    @PostMapping("/update")
-    public ResponseEntity<Invitation> updateInvitation(@RequestHeader("Authorization") String token,
-                                                       @RequestBody @Valid Invitation invitation,
-                                                       BindingResult bindingResult) {
-
-        if (invitationsService.findById(invitation.getId()).isEmpty())
-            bindingResult.rejectValue("id", "", "Invitation with this id wasn't found!");
-
-        invitationValidator.validate(invitation, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
-
-        Person found_person = personUtil.getPersonByToken(token);
-
-        if (found_person.getId() != invitation.getPersonFrom().getId())
-            throw new DataException("Attempt to change another person's data");
-
-        invitationsService.update(invitation);
-
-        return new ResponseEntity<>(invitation, HttpStatus.OK);
-    }
-     */
-
+    // Удалить (отклонить) приглашение
     @PostMapping("/delete")
     public ResponseEntity<Invitation> deleteInvitation(@RequestHeader("Authorization") String token,
                                                        @RequestBody Invitation bodyInvitation) {
@@ -137,8 +86,8 @@ public class InvitationsController {
 
         Person found_person = personUtil.getPersonByToken(token);
 
-        if (found_person.getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonFrom().getId() &&
-                found_person.getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonTo().getId())
+        if (found_person.getId() != foundInvitation.get().getPersonFrom().getId() &&
+                found_person.getId() != foundInvitation.get().getPersonTo().getId())
             throw new DataException("Attempt to change another person's data");
 
         invitationsService.delete(bodyInvitation.getId());
@@ -146,6 +95,7 @@ public class InvitationsController {
         return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
     }
 
+    // Принять приглашение
     @PostMapping("/accept")
     public ResponseEntity<Invitation> acceptInvitation(@RequestHeader("Authorization") String token,
                                                        @RequestBody Invitation bodyInvitation) {
@@ -156,15 +106,13 @@ public class InvitationsController {
 
         Person found_person = personUtil.getPersonByToken(token);
 
-        if (found_person.getId() != invitationsService.findById(bodyInvitation.getId()).get().getPersonTo().getId())
+        if (found_person.getId() != foundInvitation.get().getPersonTo().getId())
             throw new DataException("Attempt to change another person's data");
 
         invitationsService.accept(bodyInvitation.getId());
 
         return new ResponseEntity<>(foundInvitation.get(), HttpStatus.OK);
     }
-
-
 
 
     @ExceptionHandler

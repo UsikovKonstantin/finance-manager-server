@@ -8,10 +8,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.repositories.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.services.PeopleService;
-import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
@@ -29,33 +27,21 @@ import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 public class PeopleController {
 
     private final PeopleService peopleService;
-    private final TeamsService teamsService;
     private final PasswordEncoder passwordEncoder;
     private final PersonValidator personValidator;
-    private final TokensRepository tokensRepository;
     private final Validator validator;
     private final PersonUtil personUtil;
     @Autowired
-    public PeopleController(PeopleService peopleService, TeamsService teamsService, PasswordEncoder passwordEncoder, PersonValidator personValidator, TokensRepository tokensRepository, TokensRepository tokensRepository1, Validator validator, PersonUtil personUtil) {
+    public PeopleController(PeopleService peopleService, PasswordEncoder passwordEncoder, PersonValidator personValidator, Validator validator, PersonUtil personUtil) {
         this.peopleService = peopleService;
-        this.teamsService = teamsService;
         this.passwordEncoder = passwordEncoder;
         this.personValidator = personValidator;
-        this.tokensRepository = tokensRepository1;
         this.validator = validator;
         this.personUtil = personUtil;
     }
 
-    /*
-    // Получить список всех людей
-    @GetMapping()
-    public ResponseEntity<List<Person>> getAllPeople() {
-        List<Person> people = peopleService.findAll();
-        return new ResponseEntity<>(people, HttpStatus.OK);
-    }
-     */
 
-    // Получить список людей в группе
+    // Получить список людей в моей группе
     @GetMapping("/team")
     public ResponseEntity<List<Person>> getPeopleByTeamId(@RequestHeader("Authorization") String token) {
 
@@ -97,7 +83,6 @@ public class PeopleController {
         return new ResponseEntity<>(peopleService.findById(toKick.get().getId()).get(), HttpStatus.OK);
     }
 
-
     // Выйти из группы
     @PostMapping("/leave")
     public ResponseEntity<Person> kick(@RequestHeader("Authorization") String token) {
@@ -110,8 +95,6 @@ public class PeopleController {
 
         return new ResponseEntity<>(peopleService.findById(person.getId()).get(), HttpStatus.OK);
     }
-
-
 
     // Сделать человека лидером
     @PostMapping("/giveLeader")
@@ -137,19 +120,7 @@ public class PeopleController {
         return new ResponseEntity<>(peopleService.findById(toLeader.get().getId()).get(), HttpStatus.OK);
     }
 
-
-    /*
-    // Получить человека по email
-    @GetMapping("/email")
-    public ResponseEntity<Person> getPersonByEmail(@RequestBody Person bodyPerson) {
-        Optional<Person> person = peopleService.findByEmail(bodyPerson.getEmail());
-        if (person.isEmpty())
-            throw new NotFoundException("Person with this email wasn't found!");
-        return new ResponseEntity<>(person.get(), HttpStatus.OK);
-    }
-     */
-
-
+    // Обновить данные человека
     @PostMapping("/update")
     public ResponseEntity<Person> updatePerson(@RequestHeader("Authorization") String token,
                                                @RequestBody Person person) {

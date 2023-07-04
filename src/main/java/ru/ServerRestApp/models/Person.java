@@ -9,8 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
 import java.util.Collection;
-import java.util.List;
 import jakarta.validation.constraints.*;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -54,8 +54,6 @@ public class Person implements UserDetails {
     @Column(name = "role")
     private String role;
 
-    //@NotEmpty(message = "Поле confirmed не должно быть пустым")
-    //@Pattern(regexp = "^[TF]$", message = "Поле confirmed должно иметь значение либо 'T', либо 'F'")
     @Column(name = "confirmed")
     private String confirmed;
 
@@ -64,10 +62,7 @@ public class Person implements UserDetails {
     @JoinColumn(name = "team_id", referencedColumnName = "id")
     private Team team;
 
-    public Person(String full_name, String email, String password, double balance,
-                  String gender, String role, Team team, List<CategoryTransaction> categoryTransactions,
-                  List<Invitation> invitations_from, List<Invitation> invitations_to,
-                  List<PersonTransaction> transactions_from, List<PersonTransaction> transactions_to) {
+    public Person(String full_name, String email, String password, double balance, String gender, String role, Team team) {
         this.full_name = full_name;
         this.email = email;
         this.password = password;
@@ -75,18 +70,9 @@ public class Person implements UserDetails {
         this.gender = gender;
         this.role = role;
         this.team = team;
-        //this.categoryTransactions = categoryTransactions;
-        //this.invitations_from = invitations_from;
-        //this.invitations_to = invitations_to;
-        //this.transactions_from = transactions_from;
-        //this.transactions_to = transactions_to;
     }
 
-    public Person(int id, String full_name, String email, String password,
-                  double balance, String gender, String role, Team team,
-                  List<CategoryTransaction> categoryTransactions,
-                  List<Invitation> invitations_from, List<Invitation> invitations_to,
-                  List<PersonTransaction> transactions_from, List<PersonTransaction> transactions_to) {
+    public Person(int id, String full_name, String email, String password, double balance, String gender, String role, Team team) {
         this.id = id;
         this.full_name = full_name;
         this.email = email;
@@ -95,11 +81,6 @@ public class Person implements UserDetails {
         this.gender = gender;
         this.role = role;
         this.team = team;
-        //this.categoryTransactions = categoryTransactions;
-        //this.invitations_from = invitations_from;
-        //this.invitations_to = invitations_to;
-        //this.transactions_from = transactions_from;
-        //this.transactions_to = transactions_to;
     }
 
 

@@ -1,7 +1,6 @@
 package ru.ServerRestApp.models;
 
 import jakarta.persistence.*;
-import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
@@ -19,25 +18,17 @@ public class Category {
     @Column(name = "name")
     private String name;
 
-/*
-    @OneToMany(mappedBy = "category")
-    private List<CategoryTransaction> categoryTransactions;
-*/
-
     public Category() {
     }
 
-    public Category(String name, List<CategoryTransaction> categoryTransactions) {
+    public Category(String name) {
         this.name = name;
-        //this.categoryTransactions = categoryTransactions;
     }
 
-    public Category(int id, String name, List<CategoryTransaction> categoryTransactions) {
+    public Category(int id, String name) {
         this.id = id;
         this.name = name;
-        //this.categoryTransactions = categoryTransactions;
     }
-
 
     public int getId() {
         return id;
@@ -54,14 +45,6 @@ public class Category {
     public void setName(String name) {
         this.name = name;
     }
-/*
-    public List<CategoryTransaction> getCategoryTransactions() {
-        return categoryTransactions;
-    }
-
-    public void setCategoryTransactions(List<CategoryTransaction> categoryTransactions) {
-        this.categoryTransactions = categoryTransactions;
-    }*/
 
     @Override
     public String toString() {

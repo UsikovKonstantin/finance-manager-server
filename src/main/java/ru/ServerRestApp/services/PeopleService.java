@@ -1,7 +1,6 @@
 package ru.ServerRestApp.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ServerRestApp.repositories.TokensRepository;
@@ -20,13 +19,11 @@ public class PeopleService {
     private final PeopleRepository peopleRepository;
     private final TeamsRepository teamsRepository;
     private final TokensRepository tokensRepository;
-    private final PasswordEncoder passwordEncoder;
     @Autowired
-    public PeopleService(PeopleRepository peopleRepository, TeamsRepository teamsRepository, TokensRepository tokensRepository, PasswordEncoder passwordEncoder) {
+    public PeopleService(PeopleRepository peopleRepository, TeamsRepository teamsRepository, TokensRepository tokensRepository) {
         this.peopleRepository = peopleRepository;
         this.teamsRepository = teamsRepository;
         this.tokensRepository = tokensRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -61,8 +58,6 @@ public class PeopleService {
 
     @Transactional
     public void update(Person person, boolean changePassword) {
-        //if (person.getTeam() != null)
-        //    person.setTeam(teamsRepository.findById(person.getTeam().getId()).get());
 
         Person found_person = peopleRepository.findById(person.getId()).get();
         if (!found_person.getEmail().equals(person.getEmail())) {
@@ -80,8 +75,6 @@ public class PeopleService {
 
 
         peopleRepository.save(found_person);
-        //int id = peopleRepository.save(person).getId();
-        //person.setId(id);
     }
 
     @Transactional
@@ -114,5 +107,4 @@ public class PeopleService {
         to.setRole("ROLE_LEADER");
         peopleRepository.save(to);
     }
-
 }

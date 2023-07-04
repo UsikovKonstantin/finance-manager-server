@@ -14,7 +14,6 @@ import ru.ServerRestApp.validators.CategoryTransactionValidator;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
@@ -32,15 +31,6 @@ public class CategoryTransactionsController {
         this.categoryTransactionValidator = categoryTransactionValidator;
         this.personUtil = personUtil;
     }
-
-    /*
-    // Получить все транзакции
-    @GetMapping()
-    public ResponseEntity<List<CategoryTransaction>> getAllCategoryTransactions() {
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findAll();
-        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
-    }
-    */
 
 
     // Получить транзакции пользователя за все время
@@ -62,30 +52,6 @@ public class CategoryTransactionsController {
         List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByPersonTeamId(person.getTeam().getId());
         return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
     }
-
-    /*
-    // Получить все транзакции по определенной категории
-    @GetMapping("/category/byId")
-    public ResponseEntity<List<CategoryTransaction>> getCategoryTransactionsByCategoryId(@RequestBody Category bodyCategory) {
-        Optional<Category> category = categoriesService.findById(bodyCategory.getId());
-        if (category.isEmpty())
-            throw new NotFoundException("Category with this id wasn't found!");
-
-        List<CategoryTransaction> categoryTransactions = categoryTransactionsService.findByCategoryId(bodyCategory.getId());
-        return new ResponseEntity<>(categoryTransactions, HttpStatus.OK);
-    }
-    */
-
-    /*
-    // Получить транзакцию по id
-    @GetMapping("/byId")
-    public ResponseEntity<CategoryTransaction> getCategoryTransaction(@RequestBody CategoryTransaction bodyCategoryTransaction) {
-        Optional<CategoryTransaction> categoryTransaction = categoryTransactionsService.findById(bodyCategoryTransaction.getId());
-        if (categoryTransaction.isEmpty())
-            throw new NotFoundException("CategoryTransaction with this id wasn't found!");
-        return new ResponseEntity<>(categoryTransaction.get(), HttpStatus.OK);
-    }
-    */
 
     // Получить доходы человека за все время, сгруппированные по категории
     @GetMapping("/person/income")
@@ -122,8 +88,6 @@ public class CategoryTransactionsController {
 
         return new ResponseEntity<>(categoryTransactionsService.getNegativeTransactionsByCategoryForGroup(person.getTeam().getId()), HttpStatus.OK);
     }
-
-
 
     // Получить транзакции пользователя за месяц
     @GetMapping("/person/month")
@@ -210,8 +174,6 @@ public class CategoryTransactionsController {
                 person.getTeam().getId(), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)), HttpStatus.OK);
     }
 
-
-
     // Получить n последних доходов пользователя
     @GetMapping("/person/income/last")
     public ResponseEntity<List<CategoryTransaction>> findNLastPositiveTransactionsForPerson(@RequestHeader("Authorization") String token,
@@ -231,7 +193,6 @@ public class CategoryTransactionsController {
 
         return new ResponseEntity<>(categoryTransactionsService.findNLastNegativeTransactionsForPerson(person.getId(), limit), HttpStatus.OK);
     }
-
 
 
     // Добавить транзакцию
@@ -254,49 +215,6 @@ public class CategoryTransactionsController {
 
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
     }
-
-    // Обновить транзакцию
-    @PostMapping("/update")
-    public ResponseEntity<CategoryTransaction> updateCategoryTransaction(@RequestHeader("Authorization") String token,
-                                                                         @RequestBody @Valid CategoryTransaction categoryTransaction,
-                                                                         BindingResult bindingResult) {
-
-        if (categoryTransactionsService.findById(categoryTransaction.getId()).isEmpty())
-            bindingResult.rejectValue("id", "", "CategoryTransaction with this id wasn't found!");
-
-        Person person = personUtil.getPersonByToken(token);
-
-        categoryTransaction.setPerson(person);
-
-        categoryTransactionValidator.validate(categoryTransaction, bindingResult);
-
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
-
-        categoryTransactionsService.update(categoryTransaction);
-
-        return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
-    }
-
-    // Удалить транзакцию
-    @PostMapping("/delete")
-    public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@RequestHeader("Authorization") String token,
-                                                                         @RequestBody CategoryTransaction bodyCategoryTransaction) {
-
-        Optional<CategoryTransaction> foundCategoryTransaction = categoryTransactionsService.findById(bodyCategoryTransaction.getId());
-        if (foundCategoryTransaction.isEmpty())
-            throw new NotFoundException("CategoryTransaction with this id wasn't found!");
-
-        Person person = personUtil.getPersonByToken(token);
-
-        if (person.getId() != foundCategoryTransaction.get().getPerson().getId())
-            throw new DataException("Attempt to change another person's data");
-
-        categoryTransactionsService.delete(bodyCategoryTransaction.getId());
-
-        return new ResponseEntity<>(foundCategoryTransaction.get(), HttpStatus.OK);
-    }
-
 
 
     @ExceptionHandler

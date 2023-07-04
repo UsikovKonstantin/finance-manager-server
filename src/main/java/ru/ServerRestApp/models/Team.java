@@ -1,7 +1,6 @@
 package ru.ServerRestApp.models;
 
 import jakarta.persistence.*;
-import java.util.List;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,21 +26,10 @@ public class Team {
     @Column(name = "name")
     private String name;
 
-/*
-    @OneToMany(mappedBy = "team")
-    private List<Person> people;
-*/
-    public Team(String name, List<Person> people) {
-        this.name = name;
-        //this.people = people;
-    }
 
-    public Team(int id, String name, List<Person> people) {
-        this.id = id;
+    public Team(String name) {
         this.name = name;
-        //this.people = people;
     }
-
 
     public int getId() {
         return id;
@@ -58,14 +46,7 @@ public class Team {
     public void setName(String name) {
         this.name = name;
     }
-/*
-    public List<Person> getPeople() {
-        return people;
-    }
 
-    public void setPeople(List<Person> people) {
-        this.people = people;
-    }*/
 
     @Override
     public String toString() {

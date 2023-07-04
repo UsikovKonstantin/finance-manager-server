@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.ServerRestApp.models.Category;
-import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.services.CategoriesService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
@@ -26,13 +24,14 @@ public class CategoriesController {
         this.categoriesService = categoriesService;
     }
 
-
+    // Получить список всех категорий
     @GetMapping()
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoriesService.findAll();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
+    // Получить категорию по id
     @GetMapping("/byId")
     public ResponseEntity<Category> getCategory(@RequestBody Category bodyCategory) {
         Optional<Category> category = categoriesService.findById(bodyCategory.getId());
@@ -40,6 +39,7 @@ public class CategoriesController {
             throw new NotFoundException("Category with this id wasn't found!");
         return new ResponseEntity<>(category.get(), HttpStatus.OK);
     }
+
 
     @ExceptionHandler
     private ResponseEntity<ErrorResponse> handleException(NotFoundException e) {

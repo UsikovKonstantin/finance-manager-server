@@ -6,17 +6,14 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.ServerRestApp.models.PersonTransaction;
 import ru.ServerRestApp.services.PeopleService;
-import ru.ServerRestApp.services.PersonTransactionsService;
 
 @Component
 public class PersonTransactionValidator implements Validator {
 
-    private final PersonTransactionsService personTransactionsService;
     private final PeopleService peopleService;
 
     @Autowired
-    public PersonTransactionValidator(PersonTransactionsService personTransactionsService, PeopleService peopleService) {
-        this.personTransactionsService = personTransactionsService;
+    public PersonTransactionValidator(PeopleService peopleService) {
         this.peopleService = peopleService;
     }
 

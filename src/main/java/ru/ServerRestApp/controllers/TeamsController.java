@@ -8,7 +8,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
-import ru.ServerRestApp.services.EmailSenderService;
 import ru.ServerRestApp.services.TeamsService;
 import ru.ServerRestApp.util.ErrorResponse;
 import ru.ServerRestApp.util.DataException;
@@ -24,22 +23,12 @@ public class TeamsController {
 
     private final TeamsService teamsService;
     private final PersonUtil personUtil;
-    private final EmailSenderService emailSenderService;
     @Autowired
-    public TeamsController(TeamsService teamsService, PersonUtil personUtil, EmailSenderService emailSenderService) {
+    public TeamsController(TeamsService teamsService, PersonUtil personUtil) {
         this.teamsService = teamsService;
         this.personUtil = personUtil;
-        this.emailSenderService = emailSenderService;
     }
 
-    /*
-    // Получить все группы
-    @GetMapping()
-    public ResponseEntity<List<Team>> getAllTeams() {
-        List<Team> teams = teamsService.findAll();
-        return new ResponseEntity<>(teams, HttpStatus.OK);
-    }
-     */
 
     // Получить мою группу
     @GetMapping("/my")
@@ -49,28 +38,7 @@ public class TeamsController {
         return new ResponseEntity<>(person.getTeam(), HttpStatus.OK);
     }
 
-    @GetMapping("/send")
-    public void SendMessage(@RequestHeader("Authorization") String token) {
-
-        emailSenderService.sendEmail("usikov-kostya@mail.ru", "123", "Hello world");
-
-    }
-
-    /*
-    @PostMapping("/add")
-    public ResponseEntity<Team> addTeam(@RequestBody @Valid Team team, BindingResult bindingResult) {
-
-        team.setId(0);
-        if (bindingResult.hasErrors())
-            returnDataErrorsToClient(bindingResult);
-
-        teamsService.save(team);
-
-        return new ResponseEntity<>(team, HttpStatus.OK);
-    }
-    */
-
-
+    // Обновить название группы
     @PostMapping("/update")
     public ResponseEntity<Team> updateTeam(@RequestHeader("Authorization") String token,
                                            @RequestBody @Valid Team team, BindingResult bindingResult) {
@@ -85,20 +53,6 @@ public class TeamsController {
 
         return new ResponseEntity<>(team, HttpStatus.OK);
     }
-
-    /*
-    @PostMapping("/delete/{id}")
-    public ResponseEntity<Team> deleteTeam(@PathVariable("id") int id) {
-
-        Optional<Team> foundTeam = teamsService.findById(id);
-        if (foundTeam.isEmpty())
-            throw new NotFoundException("Team with this id wasn't found!");
-
-        teamsService.delete(id);
-
-        return new ResponseEntity<>(foundTeam.get(), HttpStatus.OK);
-    }
-*/
 
 
     @ExceptionHandler
