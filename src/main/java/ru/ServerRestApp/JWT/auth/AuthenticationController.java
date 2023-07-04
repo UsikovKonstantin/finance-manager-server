@@ -2,12 +2,16 @@ package ru.ServerRestApp.JWT.auth;
 
 
 import jakarta.security.auth.message.AuthException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+import ru.ServerRestApp.JWT.Request.AuthenticationRequest;
+import ru.ServerRestApp.JWT.Request.ForgotPasswordRequest;
+import ru.ServerRestApp.JWT.Request.RegisterRequest;
+import ru.ServerRestApp.JWT.Response.AuthenticationResponse;
+import ru.ServerRestApp.JWT.Response.ForgotPasswordResponse;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -36,12 +40,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody  AuthenticationRequest request, HttpServletResponse response){
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response){
         return ResponseEntity.ok(service.authenticate(request, response));
     }
 
     @PostMapping("/forgotPassword")
-    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody  ForgotPasswordRequest request, HttpServletResponse response){
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest request, HttpServletResponse response){
         return ResponseEntity.ok(service.forgotPassword(request, response));
     }
 
@@ -49,11 +53,6 @@ public class AuthenticationController {
     public ResponseEntity<ForgotPasswordResponse> forgotPasswordConfirm(@RequestBody  ForgotPasswordRequest request, HttpServletResponse response){
         return ResponseEntity.ok(service.forgotPasswordConfirm(request, response));
     }
-
-    /*@PostMapping("/token")
-    public ResponseEntity<AuthenticationResponse> getNewAccessToken(@RequestBody  RefreshJwtRequest  request){
-        return ResponseEntity.ok(service.getAccessToken(request.getRefreshToken()));
-    }*/
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> getNewRefreshToken(@CookieValue(value = "refreshToken", defaultValue = "")  String refreshToken, HttpServletResponse response) throws AuthException {

@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.ServerRestApp.JWT.repository.TokensRepository;
+import ru.ServerRestApp.repositories.TokensRepository;
 import ru.ServerRestApp.models.*;
 import ru.ServerRestApp.services.InvitationsService;
 import ru.ServerRestApp.services.PeopleService;

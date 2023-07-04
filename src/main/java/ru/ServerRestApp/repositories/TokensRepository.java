@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT.repository;
+package ru.ServerRestApp.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.ServerRestApp.models.Tokens;

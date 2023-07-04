@@ -13,28 +13,27 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
 @Service
     public class JwtService {
 
+    //Секретный ключ для получения токенов
     private static final  String SECRET_KEY = "2or7vB6cLZG22+OHy6O2e2KVfxkU4cHit+kWJGF7FIpqRrySInHIWlE6Yha0PvAN";
+    //Токен, используемый для выполнения запросов
     private static final Key jwtAccessSecret = getSignInKey();
+    //Токен, используемый для обновление пары access и refresh токенов
     private static final Key jwtRefreshSecret = getSignInKey();
 
-    public  String extractUsername(String token) { return extractClaim(token, Claims::getSubject); }
-
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    //Кодировка секретного ключа
+    private static Key getSignInKey(){
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    //Генерация access токена
     public static String generateToken(UserDetails userDetails){ return generateToken(new HashMap<>(), userDetails); }
 
-    public static String generateToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ){
+    public static String generateToken(Map<String, Object> extraClaims, UserDetails userDetails){
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -45,6 +44,7 @@ import java.util.logging.Logger;
                 .compact();
     }
 
+    //Генерация refresh токена
     public static String generateRefreshToken(UserDetails userDetails)
     {
         return Jwts
@@ -65,7 +65,6 @@ import java.util.logging.Logger;
     }
 
     private static boolean validateToken(@NonNull String token, @NonNull Key secret) {
-
         try {
             Jwts.parserBuilder()
                     .setSigningKey(secret)
@@ -109,8 +108,12 @@ import java.util.logging.Logger;
                 .parseClaimsJws(token)
                 .getBody();
     }
-    private static Key getSignInKey(){
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+
+
+    public  String extractUsername(String token) { return extractClaim(token, Claims::getSubject); }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 }

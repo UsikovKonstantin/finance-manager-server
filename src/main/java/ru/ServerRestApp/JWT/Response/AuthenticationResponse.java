@@ -1,6 +1,5 @@
-package ru.ServerRestApp.JWT.auth;
+package ru.ServerRestApp.JWT.Response;
 
-import jakarta.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -4,18 +4,22 @@ import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.ServerRestApp.JWT.Request.AuthenticationRequest;
+import ru.ServerRestApp.JWT.Request.ForgotPasswordRequest;
+import ru.ServerRestApp.JWT.Request.RegisterRequest;
+import ru.ServerRestApp.JWT.Response.AuthenticationResponse;
+import ru.ServerRestApp.JWT.Response.ForgotPasswordResponse;
 import ru.ServerRestApp.JWT.config.JwtService;
-import ru.ServerRestApp.JWT.repository.TokensRepository;
-import ru.ServerRestApp.JWT.repository.UserRepository;
+import ru.ServerRestApp.repositories.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.models.Tokens;
+import ru.ServerRestApp.repositories.PeopleRepository;
 import ru.ServerRestApp.repositories.TeamsRepository;
 import ru.ServerRestApp.services.EmailSenderService;
 import ru.ServerRestApp.services.PeopleService;
@@ -30,7 +34,7 @@ import java.util.Optional;
 
 public class AuthenticationService {
 
-    private final UserRepository repository;
+    private final PeopleRepository repository;
     private final TokensRepository tokensRepository;
     private final TeamsRepository teamsRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,7 +46,7 @@ public class AuthenticationService {
     private final PeopleService peopleService;
 
     @Autowired
-    public AuthenticationService(UserRepository repository, TokensRepository tokensRepository, TeamsRepository teamsRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, EmailSenderService emailSenderService, PersonUtil personUtil, PeopleService peopleService) {
+    public AuthenticationService(PeopleRepository repository, TokensRepository tokensRepository, TeamsRepository teamsRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, EmailSenderService emailSenderService, PersonUtil personUtil, PeopleService peopleService) {
         this.repository = repository;
         this.tokensRepository = tokensRepository;
         this.teamsRepository = teamsRepository;
@@ -54,6 +58,7 @@ public class AuthenticationService {
         this.peopleService = peopleService;
     }
 
+    //Регистрация пользователя
     public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
 
             var person = Person.builder()
@@ -112,6 +117,7 @@ public class AuthenticationService {
                     .build();
     }
 
+    //Подтверждение регистрации
     public AuthenticationResponse confirmRegistration(String token, HttpServletResponse response) {
 
         Person person = personUtil.getPersonByTokenNew(token);
@@ -127,6 +133,7 @@ public class AuthenticationService {
                 .build();
     }
 
+    //Аутентификация(подключение) к учётной записи
     public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) {
         try {
             authenticationManager.authenticate(
@@ -172,6 +179,7 @@ public class AuthenticationService {
         catch (ResponseStatusException e) { return AuthenticationResponse.builder().error("Неправильно введён логин или пароль").build(); }
     }
 
+    //Запрос на случай, если пользователь забыл пароль
     public ForgotPasswordResponse forgotPassword(ForgotPasswordRequest request, HttpServletResponse response) {
 
         Optional<Person> found_person = repository.findByEmail(request.getEmail());
@@ -209,6 +217,7 @@ public class AuthenticationService {
                 .build();
     }
 
+    //Подтверждение запроса, если пользователь забыл пароль
     public ForgotPasswordResponse forgotPasswordConfirm(ForgotPasswordRequest request, HttpServletResponse response) {
 
         Person person = personUtil.getPersonByTokenNew(request.getToken());
@@ -247,35 +256,7 @@ public class AuthenticationService {
                 .build();
     }
 
-
-    /*public AuthenticationResponse getAccessToken(String refreshToken) {
-        try {
-            if (JwtService.validateRefreshToken(refreshToken)) {
-                final Claims claims = JwtService.getRefreshClaims(refreshToken);
-                final String login = claims.getSubject();
-                final String saveRefreshToken = refreshStorage.get(login);
-                if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
-                    final Person user = repository.findByEmail(login)
-                            .orElseThrow();
-                    final String accessToken = JwtService.generateToken(user);
-                    return AuthenticationResponse.builder()
-                            .token(accessToken)
-                            .refreshToken(null)
-                            .build();
-                }
-                else {
-                    return AuthenticationResponse.builder().error("Такого рефреш токена не существует").build();
-                }
-            }
-        }
-        catch (ExpiredJwtException e) { return AuthenticationResponse.builder().error("Срок действия токена истек").build(); }
-        catch (UnsupportedJwtException e) { return AuthenticationResponse.builder().error("Неподдерживаемый jwt").build(); }
-        catch (MalformedJwtException e) { return AuthenticationResponse.builder().error("Деформированный jwt").build();}
-        catch (SignatureException e) { return AuthenticationResponse.builder().error("Недействительная подпись").build(); }
-        catch (Exception e) { return AuthenticationResponse.builder().error("Невалидный токен").build(); }
-        return AuthenticationResponse.builder().build();
-    }*/
-
+    //Обновить access и refresh токены
     public AuthenticationResponse refresh(String refreshToken, HttpServletResponse response){
         try {
             if (JwtService.validateRefreshToken(refreshToken)) {
@@ -314,7 +295,7 @@ public class AuthenticationService {
         catch (Exception e) { return AuthenticationResponse.builder().error("Невалидный токен").build(); }
         return AuthenticationResponse.builder().build();
     }
-
+    //Очистить Cookie
     public AuthenticationResponse logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setPath("/");

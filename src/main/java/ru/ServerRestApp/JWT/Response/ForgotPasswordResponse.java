@@ -1,4 +1,4 @@
-package ru.ServerRestApp.JWT.auth;
+package ru.ServerRestApp.JWT.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

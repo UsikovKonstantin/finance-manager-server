@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ServerRestApp.JWT.repository.TokensRepository;
+import ru.ServerRestApp.repositories.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Team;
 import ru.ServerRestApp.models.Tokens;

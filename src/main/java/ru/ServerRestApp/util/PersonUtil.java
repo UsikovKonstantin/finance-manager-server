@@ -1,8 +1,7 @@
 package ru.ServerRestApp.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ServerRestApp.JWT.repository.TokensRepository;
+import ru.ServerRestApp.repositories.TokensRepository;
 import ru.ServerRestApp.models.Person;
 import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.services.PeopleService;
