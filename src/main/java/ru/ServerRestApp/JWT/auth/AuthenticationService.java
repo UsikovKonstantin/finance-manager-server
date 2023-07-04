@@ -179,6 +179,9 @@ public class AuthenticationService {
             throw new NotFoundException("Такого пользователя не существует");
         Person person = found_person.get();
 
+        if ("F".equals(person.getConfirmed()))
+            throw new DataException("Пользователь не подтвердил регистрацию");
+
         final String accessToken = jwtService.generateToken(person);
         refreshToken  = jwtService.generateRefreshToken(person);
 
@@ -209,6 +212,9 @@ public class AuthenticationService {
     public ForgotPasswordResponse forgotPasswordConfirm(ForgotPasswordRequest request, HttpServletResponse response) {
 
         Person person = personUtil.getPersonByTokenNew(request.getToken());
+
+        if ("F".equals(person.getConfirmed()))
+            throw new DataException("Пользователь не подтвердил регистрацию");
 
         /*
         final String accessToken = jwtService.generateToken(person);
