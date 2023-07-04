@@ -115,7 +115,6 @@ public class PersonTransactionsService {
         return personTransactionsRepository.findNLastTransactionsToPerson(id, pageable);
     }
 
-
     @Transactional
     public void save(PersonTransaction personTransaction) {
         if (personTransaction.getPersonFrom() != null)

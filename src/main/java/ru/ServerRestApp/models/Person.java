@@ -54,6 +54,11 @@ public class Person implements UserDetails {
     @Column(name = "role")
     private String role;
 
+    @NotEmpty(message = "Поле confirmed не должно быть пустым")
+    @Pattern(regexp = "^[TF]$", message = "Поле confirmed должно иметь значение либо 'T', либо 'F'")
+    @Column(name = "confirmed")
+    private String confirmed;
+
 
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "id")

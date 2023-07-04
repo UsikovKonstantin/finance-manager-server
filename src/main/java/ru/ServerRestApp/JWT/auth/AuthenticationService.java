@@ -19,6 +19,7 @@ import ru.ServerRestApp.models.Tokens;
 import ru.ServerRestApp.repositories.TeamsRepository;
 import ru.ServerRestApp.services.EmailSenderService;
 import ru.ServerRestApp.services.PeopleService;
+import ru.ServerRestApp.util.DataException;
 import ru.ServerRestApp.util.NotFoundException;
 import ru.ServerRestApp.util.PersonUtil;
 
@@ -73,8 +74,14 @@ public class AuthenticationService {
                     .balance(0)
                     .gender(request.getGender())
                     .role("ROLE_LEADER")
+                    .confirmed("F")
                     .build();
+
+            Optional<Person> p = peopleService.findByEmail(person.getEmail());
+            if (p.isPresent())
+                peopleService.delete(p.get().getId());
             repository.save(person);
+
             final String accessToken = jwtService.generateToken(person);
             final String refreshToken  = jwtService.generateRefreshToken(person);
             Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
@@ -91,10 +98,29 @@ public class AuthenticationService {
             cookie.setMaxAge(500000);
             response.addCookie(cookie);
             Auth = true;
+
+            emailSenderService.sendEmail(person.getEmail(), "Подтверждение аккаунта",
+                "Для подтверждения аккаунта перейдите по ссылке: http://localhost:8080/api/v1/auth/confirmRegistration?token=" + accessToken);
+
             return AuthenticationResponse.builder()
                     .token(accessToken)
                     .person(person)
                     .build();
+    }
+
+    public AuthenticationResponse confirmRegistration(String token, HttpServletResponse response) {
+
+        Person person = personUtil.getPersonByTokenNew(token);
+
+        if ("F".equals(person.getConfirmed()))
+            person.setConfirmed("T");
+
+        peopleService.save(person);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .person(person)
+                .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) {
@@ -107,6 +133,10 @@ public class AuthenticationService {
             );
             var person = repository.findByEmail(request.getEmail())
                     .orElseThrow();
+
+            if ("F".equals(person.getConfirmed()))
+                throw new DataException("Пользователь не подтвердил регистрацию");
+
             final String accessToken = jwtService.generateToken(person);
             refreshToken  = jwtService.generateRefreshToken(person);
             Optional<Tokens> token = tokensRepository.findByEmail(person.getEmail());
@@ -285,6 +315,4 @@ public class AuthenticationService {
         Auth = false;
         return null;
     }
-
-
 }

@@ -24,6 +24,11 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.register(request, response));
     }
 
+    @GetMapping("/confirmRegistration")
+    public ResponseEntity<AuthenticationResponse> confirmRegistration(@RequestParam("token") String token, HttpServletResponse response){
+        return ResponseEntity.ok(service.confirmRegistration(token, response));
+    }
+
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody  AuthenticationRequest request, HttpServletResponse response){
         return ResponseEntity.ok(service.authenticate(request, response));
@@ -34,7 +39,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.forgotPassword(request, response));
     }
 
-    @PostMapping("/forgotPasswordConfirm")
+    @GetMapping("/forgotPasswordConfirm")
     public ResponseEntity<ForgotPasswordResponse> forgotPasswordConfirm(@RequestBody  ForgotPasswordRequest request, HttpServletResponse response){
         return ResponseEntity.ok(service.forgotPasswordConfirm(request, response));
     }
