@@ -55,15 +55,8 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
-            var teams = Team.builder()
-                    .name("Новая группа")
-                    .build();
-            int id = teamsRepository.save(teams).getId();
-            Optional<Team> team = teamsRepository.findById(teams.getId());
-            team.get().setName("Группа " + id);
-            teamsRepository.save(team.get());
+
             var person = Person.builder()
-                    .team(team.get())
                     .full_name(request.getName())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
@@ -74,9 +67,25 @@ public class AuthenticationService {
                     .build();
 
             Optional<Person> p = peopleService.findByEmail(person.getEmail());
-            if (p.isPresent())
+            if (p.isPresent() && "F".equals(p.get().getConfirmed())) {
+                teamsRepository.delete(p.get().getTeam());
                 peopleService.delete(p.get().getId());
-            repository.save(person);
+            }
+
+            int person_id = repository.save(person).getId();
+
+            var teams = Team.builder()
+                    .name("Новая группа")
+                    .build();
+            int id = teamsRepository.save(teams).getId();
+            Optional<Team> team = teamsRepository.findById(teams.getId());
+            team.get().setName("Группа " + id);
+            teamsRepository.save(team.get());
+
+            Person person1 = peopleService.findById(person_id).get();
+            person1.setTeam(teams);
+            peopleService.save(person);
+
 
             final String accessToken = jwtService.generateToken(person);
             final String refreshToken  = jwtService.generateRefreshToken(person);
