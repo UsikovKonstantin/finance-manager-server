@@ -14,6 +14,7 @@ import ru.ServerRestApp.validators.CategoryTransactionValidator;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ru.ServerRestApp.util.ErrorsUtil.returnDataErrorsToClient;
 
@@ -214,6 +215,25 @@ public class CategoryTransactionsController {
         categoryTransactionsService.save(categoryTransaction);
 
         return new ResponseEntity<>(categoryTransaction, HttpStatus.OK);
+    }
+
+    // Удалить транзакцию
+    @PostMapping("/delete")
+    public ResponseEntity<CategoryTransaction> deleteCategoryTransaction(@RequestHeader("Authorization") String token,
+                                                                         @RequestBody CategoryTransaction bodyCategoryTransaction) {
+
+        Optional<CategoryTransaction> foundCategoryTransaction = categoryTransactionsService.findById(bodyCategoryTransaction.getId());
+        if (foundCategoryTransaction.isEmpty())
+            throw new NotFoundException("CategoryTransaction with this id wasn't found!");
+
+        Person person = personUtil.getPersonByToken(token);
+
+        if (person.getId() != foundCategoryTransaction.get().getPerson().getId())
+            throw new DataException("Attempt to change another person's data");
+
+        categoryTransactionsService.delete(bodyCategoryTransaction.getId());
+
+        return new ResponseEntity<>(foundCategoryTransaction.get(), HttpStatus.OK);
     }
 
 
