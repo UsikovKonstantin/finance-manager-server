@@ -18,6 +18,11 @@ public class Category {
     @Column(name = "name")
     private String name;
 
+    @NotEmpty(message = "Тип категории не должен быть пустым")
+    @Size(min = 1, max = 10, message = "Тип категории должен быть от 1 до 10 символов длиной")
+    @Column(name = "type")
+    private String type;
+
     public Category() {
     }
 
@@ -44,6 +49,14 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
